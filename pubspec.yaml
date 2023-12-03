@@ -45,6 +45,7 @@ dependencies:
   font_awesome_flutter: ^10.6.0
   google_fonts: ^6.1.0
   image_picker: ^1.0.4
+  shared_preferences: ^2.2.2
   sizer: ^2.0.15
   url_launcher: ^6.2.1
 

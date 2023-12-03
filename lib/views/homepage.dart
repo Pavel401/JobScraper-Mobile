@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:jobhunt_mobile/blocs/home/app_blocs.dart';
 import 'package:jobhunt_mobile/blocs/home/app_events.dart';
 import 'package:jobhunt_mobile/blocs/home/app_states.dart';
 
 import 'package:jobhunt_mobile/model/jobModel.dart';
 import 'package:jobhunt_mobile/repo/repositiories.dart';
+import 'package:jobhunt_mobile/services/authentication.dart';
 import 'package:jobhunt_mobile/views/Profile/profile_readView.dart';
+import 'package:jobhunt_mobile/views/Settings/settings.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
@@ -34,6 +37,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+  int _drawerIndex = 0;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -50,77 +54,62 @@ class _HomePageState extends State<HomePage> {
         UserRepository(),
       )..add(LoadUserEvent()),
       child: Scaffold(
-        bottomNavigationBar: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: (int index) {
+            print("Drawer index: $index");
+
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+          destinations: [
+            NavigationDestination(
               icon: Icon(Icons.work_outline),
               label: 'Jobs',
-              activeIcon: Icon(Icons.work),
+              selectedIcon: Icon(Icons.work),
             ),
-            BottomNavigationBarItem(
+            NavigationDestination(
               icon: Icon(Icons.bookmark_outline),
-              activeIcon: Icon(Icons.bookmark),
+              selectedIcon: Icon(Icons.bookmark),
               label: 'Bookmarks',
             ),
-            BottomNavigationBarItem(
+            NavigationDestination(
               icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
+              selectedIcon: Icon(Icons.person),
               label: 'Profile',
             ),
           ],
-          currentIndex: _selectedIndex,
-          // selectedItemColor: Colors.amber[800],
-          onTap: _onItemTapped,
         ),
         key: UniqueKey(),
-        drawer: Drawer(
-          child: ListView(
-            children: [
-              DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                ),
-                child: Text(
-                  'Drawer Header',
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              ListTile(
-                leading: Icon(Icons.home),
-                title: Text('Home'),
-                onTap: () {
-                  // Implement the action for Home
-                  Navigator.pop(context); // Close the drawer
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.settings),
-                title: Text('Settings'),
-                onTap: () {
-                  // Implement the action for Settings
-                  Navigator.pop(context); // Close the drawer
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.link),
-                title: Text('GitHub'),
-                onTap: () {
-                  // Implement the action for GitHub
-                  Navigator.pop(context); // Close the drawer
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.exit_to_app),
-                title: Text('Sign Out'),
-                onTap: () {
-                  // Implement the action for Sign Out
-                  Navigator.pop(context); // Close the drawer
-                },
-              ),
-            ],
-          ),
+        drawer: NavigationDrawer(
+          selectedIndex: _drawerIndex,
+          onDestinationSelected: (int value) {
+            setState(() {
+              _drawerIndex = value;
+            });
+            handleDrawerOnClick(value);
+          },
+          children: const <Widget>[
+            SizedBox(height: 16),
+            NavigationDrawerDestination(
+              icon: Icon(Icons.work),
+              label: Text('Jobs'),
+            ),
+            NavigationDrawerDestination(
+              icon: Icon(Icons.settings),
+              label: Text('Settings'),
+            ),
+            Divider(),
+            NavigationDrawerDestination(
+              icon: FaIcon(FontAwesomeIcons.github),
+              label: Text('Github'),
+            ),
+            NavigationDrawerDestination(
+              icon: Icon(Icons.logout),
+              label: Text('Logout'),
+            ),
+          ],
         ),
         appBar: AppBar(
           title: const Text("Job Hunt"),
@@ -166,15 +155,12 @@ class _HomePageState extends State<HomePage> {
                                 userList[index].applyUrl); // Launch URL on tap
                           },
                           child: Card(
-                            color: Theme.of(context).primaryColor,
                             child: ListTile(
                               title: Text(
                                 userList[index].title,
-                                style: const TextStyle(color: Colors.white),
                               ),
                               subtitle: Text(
                                 userList[index].company,
-                                style: const TextStyle(color: Colors.white),
                               ),
                               leading: CircleAvatar(
                                 backgroundImage:
@@ -204,6 +190,34 @@ class _HomePageState extends State<HomePage> {
   Future<void> _launchURL(String url) async {
     if (!await launchUrl(Uri.parse(url))) {
       throw Exception('Could not launch $url');
+    }
+  }
+
+  handleDrawerOnClick(int index) async {
+    print("Drawer OnClick Index: $index");
+    if (index == 0) {
+      Navigator.of(context).pop();
+    }
+    if (index == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) {
+            return SettingsView();
+          },
+        ),
+      );
+    }
+    if (index == 2) {
+      if (!await launchUrl(
+          Uri.parse("https://github.com/Pavel401/JobScraper-Mobile"))) {
+        throw Exception('Could not launch ');
+      }
+    }
+
+    if (index == 3) {
+      final AuthService authService = AuthService();
+      authService.signOutUser();
     }
   }
 }
