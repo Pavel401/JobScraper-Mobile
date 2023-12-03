@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:jobhunt_mobile/utility/utility.dart';
 import 'package:jobhunt_mobile/views/Pdf/pdfview.dart';
+import 'package:jobhunt_mobile/views/Profile/profile_editView.dart';
 import 'package:sizer/sizer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:jobhunt_mobile/model/userModel.dart';
@@ -50,13 +51,45 @@ class _ProfileReadViewState extends State<ProfileReadView> {
                     left: 5.w,
                     right: 5.w,
                     bottom: 2.h,
-                    top: 2.h,
                   ),
                   decoration: BoxDecoration(
                     color: Theme.of(context).primaryColor,
                   ),
                   child: Column(
                     children: [
+                      SizedBox(
+                        height: 1.h,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton.filledTonal(
+                            isSelected: false,
+                            icon: const Icon(Icons.edit_outlined),
+                            selectedIcon: const Icon(Icons.edit),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return EditProfileView();
+                                  },
+                                ),
+                              ).then((value) {
+                                setState(() {
+                                  _userFuture = init();
+                                });
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Profile updated'),
+                                  ),
+                                );
+                              });
+                            },
+                          ),
+                        ],
+                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -76,18 +109,6 @@ class _ProfileReadViewState extends State<ProfileReadView> {
                                     "assets/png/man_1.png",
                                     width: 100.0,
                                   ),
-                                ),
-                              ),
-                              Positioned(
-                                bottom: 0,
-                                right: 0,
-                                child: IconButton.filledTonal(
-                                  isSelected: false,
-                                  icon: const Icon(Icons.edit_outlined),
-                                  selectedIcon: const Icon(Icons.edit),
-                                  onPressed: () {
-                                    // Handle edit button press
-                                  },
                                 ),
                               ),
                             ],
@@ -638,9 +659,7 @@ class SkillsInfo extends StatelessWidget {
                       for (var skill in user.skills)
                         ActionChip(
                           label: Text(skill!),
-                          onPressed: () {
-                            // Handle the action when the chip is pressed
-                          },
+                          onPressed: () {},
                         ),
                     ],
                   )

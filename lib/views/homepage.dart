@@ -8,6 +8,7 @@ import 'package:jobhunt_mobile/blocs/home/app_states.dart';
 import 'package:jobhunt_mobile/model/jobModel.dart';
 import 'package:jobhunt_mobile/repo/repositiories.dart';
 import 'package:jobhunt_mobile/services/authentication.dart';
+import 'package:jobhunt_mobile/views/Profile/profile_editView.dart';
 import 'package:jobhunt_mobile/views/Profile/profile_readView.dart';
 import 'package:jobhunt_mobile/views/Settings/settings.dart';
 import 'package:url_launcher/url_launcher.dart';

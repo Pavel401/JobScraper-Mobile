@@ -3,8 +3,6 @@ import 'package:jobhunt_mobile/blocs/auth/authentication_Event.dart';
 import 'package:jobhunt_mobile/blocs/auth/authentication_state.dart';
 import 'package:jobhunt_mobile/model/userModel.dart';
 import 'package:jobhunt_mobile/services/authentication.dart';
-import 'package:jobhunt_mobile/services/crudService.dart';
-import 'package:meta/meta.dart';
 
 class AuthenticationBloc
     extends Bloc<AuthenticationEvent, AuthenticationState> {

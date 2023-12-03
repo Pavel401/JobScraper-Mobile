@@ -14,4 +14,8 @@ class CrudProvider {
     }
     return null;
   }
+
+  static Future<void> updateUserInDB(UserModel updatedUser) async {
+    await usersCollection.doc(updatedUser.id).update(updatedUser.toJson());
+  }
 }
