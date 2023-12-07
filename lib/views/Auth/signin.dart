@@ -3,20 +3,23 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jobhunt_mobile/blocs/auth/authentication_Event.dart';
 import 'package:jobhunt_mobile/blocs/auth/authentication_bloc.dart';
 import 'package:jobhunt_mobile/blocs/auth/authentication_state.dart';
-import 'package:jobhunt_mobile/views/Auth/signin.dart';
+import 'package:jobhunt_mobile/blocs/home/app_blocs.dart';
+import 'package:jobhunt_mobile/blocs/home/app_events.dart';
+import 'package:jobhunt_mobile/repo/repositiories.dart';
+import 'package:jobhunt_mobile/views/homepage.dart';
 
-class SignupScreen extends StatefulWidget {
+class SignInScreen extends StatefulWidget {
   static String id = 'login_screen';
 
-  const SignupScreen({
+  const SignInScreen({
     Key? key,
   }) : super(key: key);
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  State<SignInScreen> createState() => _SignInScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _SignInScreenState extends State<SignInScreen> {
   // Text Controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -33,7 +36,7 @@ class _SignupScreenState extends State<SignupScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'SignUp a New Account',
+          'Login to Your Account',
           style: TextStyle(
             color: Colors.deepPurple,
           ),
@@ -97,7 +100,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   child: ElevatedButton(
                     onPressed: () {
                       BlocProvider.of<AuthenticationBloc>(context).add(
-                        SignUpUser(
+                        SignInUser(
                           emailController.text.trim(),
                           passwordController.text.trim(),
                         ),
@@ -106,7 +109,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     child: Text(
                       state is AuthenticationLoadingState
                           ? '.......'
-                          : 'Signup',
+                          : 'Sign In',
                       style: TextStyle(
                         fontSize: 20,
                       ),
@@ -116,26 +119,21 @@ class _SignupScreenState extends State<SignupScreen> {
               },
             ),
             const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text("Already have an account? "),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => SignInScreen()));
-                  },
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(
-                      color: Colors.deepPurple,
-                    ),
-                  ),
-                )
-              ],
-            ),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children: [
+            //     const Text("Dont have an account? "),
+            //     GestureDetector(
+            //       onTap: () {},
+            //       child: const Text(
+            //         'Login',
+            //         style: TextStyle(
+            //           color: Colors.deepPurple,
+            //         ),
+            //       ),
+            //     )
+            //   ],
+            // ),
           ],
         ),
       ),

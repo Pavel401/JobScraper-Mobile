@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:jobhunt_mobile/blocs/home/app_blocs.dart';
 import 'package:jobhunt_mobile/blocs/home/app_events.dart';
@@ -8,6 +9,7 @@ import 'package:jobhunt_mobile/blocs/home/app_states.dart';
 import 'package:jobhunt_mobile/model/jobModel.dart';
 import 'package:jobhunt_mobile/repo/repositiories.dart';
 import 'package:jobhunt_mobile/services/authentication.dart';
+import 'package:jobhunt_mobile/services/dbHelper.dart';
 import 'package:jobhunt_mobile/views/Profile/profile_editView.dart';
 import 'package:jobhunt_mobile/views/Profile/profile_readView.dart';
 import 'package:jobhunt_mobile/views/Settings/settings.dart';
@@ -15,9 +17,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key});
-  static const TextStyle optionStyle =
+  static TextStyle optionStyle =
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-  static const List<Widget> _widgetOptions = <Widget>[
+  static List<Widget> _widgetOptions = <Widget>[
     Text(
       'Index 0: Home',
       style: optionStyle,
@@ -46,8 +48,12 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  final jobDatabaseHelper = JobDatabaseHelper();
+
   @override
   Widget build(BuildContext context) {
+    jobDatabaseHelper.initDatabase();
+
     final refreshBloc = BlocProvider.of<UserBloc>(context);
 
     return BlocProvider(
@@ -70,11 +76,11 @@ class _HomePageState extends State<HomePage> {
               label: 'Jobs',
               selectedIcon: Icon(Icons.work),
             ),
-            NavigationDestination(
-              icon: Icon(Icons.bookmark_outline),
-              selectedIcon: Icon(Icons.bookmark),
-              label: 'Bookmarks',
-            ),
+            // NavigationDestination(
+            //   icon: Icon(Icons.bookmark_outline),
+            //   selectedIcon: Icon(Icons.bookmark),
+            //   label: 'Bookmarks',
+            // ),
             NavigationDestination(
               icon: Icon(Icons.person_outline),
               selectedIcon: Icon(Icons.person),
@@ -91,7 +97,7 @@ class _HomePageState extends State<HomePage> {
             });
             handleDrawerOnClick(value);
           },
-          children: const <Widget>[
+          children: <Widget>[
             SizedBox(height: 16),
             NavigationDrawerDestination(
               icon: Icon(Icons.work),
@@ -113,19 +119,20 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         appBar: AppBar(
-          title: const Text("Job Hunt"),
+          title: Text("Job Hunt"),
           actions: [
             _selectedIndex == 0
                 ? IconButton(
                     onPressed: () {
                       refreshBloc.add(ReloadUserEvent());
                     },
-                    icon: const Icon(Icons.replay_outlined),
+                    icon: Icon(Icons.replay_outlined),
                   )
                 : SizedBox.shrink(),
           ],
         ),
         body: PageView(
+          physics: NeverScrollableScrollPhysics(),
           controller: PageController(initialPage: _selectedIndex),
           children: [
             BlocBuilder<UserBloc, UserState>(
@@ -133,13 +140,13 @@ class _HomePageState extends State<HomePage> {
               builder: (context, state) {
                 if (state is UserLoadingState) {
                   print("UserLoadingState");
-                  return const Center(
+                  return Center(
                     child: CircularProgressIndicator(),
                   );
                 }
                 if (state is UserErrorState) {
                   print("UserErrorState");
-                  return const Center(child: Text("Error"));
+                  return Center(child: Text("Error"));
                 }
                 if (state is UserLoadedState) {
                   print("UserLoadedState");
@@ -148,21 +155,16 @@ class _HomePageState extends State<HomePage> {
                     itemCount: userList.length,
                     itemBuilder: (_, index) {
                       return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 4, horizontal: 8),
+                        padding:
+                            EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                         child: GestureDetector(
                           onTap: () {
-                            _launchURL(
-                                userList[index].applyUrl); // Launch URL on tap
+                            _launchURL(userList[index].applyUrl);
                           },
                           child: Card(
                             child: ListTile(
-                              title: Text(
-                                userList[index].title,
-                              ),
-                              subtitle: Text(
-                                userList[index].company,
-                              ),
+                              title: Text(userList[index].title),
+                              subtitle: Text(userList[index].company),
                               leading: CircleAvatar(
                                 backgroundImage:
                                     NetworkImage(userList[index].imageUrl),
@@ -178,9 +180,9 @@ class _HomePageState extends State<HomePage> {
                 return Container();
               },
             ),
-            Container(
-              color: Colors.green,
-            ),
+            // Container(
+            //   color: Colors.green,
+            // ),
             ProfileReadView(),
           ],
         ),
