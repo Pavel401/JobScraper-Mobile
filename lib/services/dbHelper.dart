@@ -1,4 +1,4 @@
-import 'dart:async';
+// job_database_helper.dart
 
 import 'package:jobhunt_mobile/model/jobModel.dart';
 import 'package:sqflite/sqflite.dart';
@@ -6,109 +6,70 @@ import 'package:path/path.dart';
 
 class JobDatabaseHelper {
   static final JobDatabaseHelper _instance = JobDatabaseHelper._internal();
-
   factory JobDatabaseHelper() => _instance;
-
-  JobDatabaseHelper._internal();
 
   late Database _database;
 
+  JobDatabaseHelper._internal();
+
   Future<void> initDatabase() async {
-    String path = join(await getDatabasesPath(), 'jobs_database.db');
-    bool dbExist = await databaseExists(path);
-
-    if (!dbExist) {
-      Completer<void> completer = Completer<void>(); // Create Completer
-
-      // If the database does not exist, create it
-      _database = await openDatabase(
-        path,
-        onCreate: (db, version) {
-          print('Creating the jobs table...');
-          db.execute(
-            '''
-        CREATE TABLE jobs(
-          id TEXT PRIMARY KEY,
-          title TEXT,
-          location TEXT,
-          createdAt INTEGER,
-          company TEXT,
-          applyUrl TEXT,
-          imageUrl TEXT
-        )
-        ''',
-          );
-        },
-        version: 1,
-      );
-
-      completer.complete(); // Complete the Completer
-      return completer.future; // Return the future of the Completer
-    } else {
-      // If the database already exists, open it
-      _database = await openDatabase(path, version: 1);
-      print('Opening the existing jobs database...');
-    }
-  }
-
-  Future<void> saveJob(JobModel job) async {
-    if (_database == null) {
-      // Initialize the database if it's not already initialized
-      await initDatabase();
-
-      print('Database initialized');
-    }
-
-    // Fetch the list of existing jobs
-    List<JobModel> existingJobs = await getSavedJobs();
-    print('Previous Jobs: $existingJobs');
-
-    // Add the new job to the list
-    existingJobs.add(job);
-
-    // Insert each job to the database
-    for (JobModel existingJob in existingJobs) {
-      print('Inserting job: ${existingJob.title}}');
-      await _database.insert(
-        'jobs',
-        existingJob.toJson(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-    }
-
-    // Fetch the updated list of saved jobs
-    List<JobModel> updatedJobs = await getSavedJobs();
-    print('Updated Jobs: $updatedJobs');
-
-    print('Job saved successfully: ${job.title}');
-  }
-
-  Future<void> deleteJob(String title) async {
-    final db = await _database;
-    await db.delete(
-      'jobs',
-      where: 'title = ?',
-      whereArgs: [title],
+    _database = await openDatabase(
+      join(await getDatabasesPath(), 'job_database.db'),
+      onCreate: (db, version) {
+        return db.execute(
+          '''
+        CREATE TABLE IF NOT EXISTS jobs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT,
+  location TEXT,
+  createdAt INTEGER,
+  company TEXT,
+  applyUrl TEXT,
+  ImageUrl TEXT
+)
+          ''',
+        );
+      },
+      version: 1,
     );
-
-    print('Job deleted successfully: $title');
   }
 
-  Future<List<JobModel>> getSavedJobs() async {
-    final List<Map<String, dynamic>> maps = await _database.query('jobs');
+  String insert =
+      '''INSERT INTO jobs (title, location, createdAt, company, applyUrl, ImageUrl)
+	VALUES (?, ?, ?, ?, ?, ?)''';
 
-    print('Number of saved jobs: ${maps.length}');
-
-    return List.generate(maps.length, (i) {
-      return JobModel(
-        id: maps[i]['id'],
-        title: maps[i]['title'],
-        location: maps[i]['location'],
-        createdAt: maps[i]['createdAt'],
-        company: maps[i]['company'],
-        applyUrl: maps[i]['applyUrl'],
-        imageUrl: maps[i]['imageUrl'],
+  Future<void> insertJob(JobModel job) async {
+    try {
+      await _database.rawInsert(
+        insert,
+        [
+          job.title,
+          job.location,
+          job.createdAt,
+          job.company,
+          job.applyUrl,
+          job.imageUrl,
+        ],
       );
-    });
+    } catch (e) {
+      print("########## Error inserting job: $e ##########");
+    }
+  }
+
+  Future<void> clearJobs() async {
+    await _database.delete('jobs');
+    print("########## Cleared Jobs ##########");
+  }
+
+  Future<List<JobModel>> getJobs() async {
+    List<JobModel> jobs = [];
+    final List<Map<String, dynamic>> maps = await _database.query('jobs');
+    print("########## Getting Jobs ##########");
+
+    for (int i = 0; i < maps.length; i++) {
+      jobs.add(JobModel.fromJson(maps[i]));
+    }
+
+    return jobs;
   }
 }

@@ -21,10 +21,12 @@ class JobModel extends Equatable {
 
   factory JobModel.fromJson(Map<String, dynamic> json) {
     return JobModel(
-      id: json['id'] ?? "",
+      id: json['id'].toString() ?? "",
       title: json['title'] ?? "",
       location: json['location'] ?? "",
-      createdAt: json['createdAt'] ?? 0,
+      createdAt: json['createdAt'] != null
+          ? int.parse(json['createdAt'].toString())
+          : 0,
       company: json['company'] ?? "",
       applyUrl: json['applyUrl'] ?? "",
       imageUrl: json['ImageUrl'] ?? "",
@@ -39,7 +41,7 @@ class JobModel extends Equatable {
       'createdAt': createdAt,
       'company': company,
       'applyUrl': applyUrl,
-      'imageUrl': imageUrl,
+      'ImageUrl': imageUrl,
     };
   }
 

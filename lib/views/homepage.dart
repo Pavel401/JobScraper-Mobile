@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:jobhunt_mobile/blocs/home/app_blocs.dart';
-import 'package:jobhunt_mobile/blocs/home/app_events.dart';
-import 'package:jobhunt_mobile/blocs/home/app_states.dart';
+import 'package:jobhunt_mobile/blocs/db/local_db_bloc.dart';
 
 import 'package:jobhunt_mobile/model/jobModel.dart';
 import 'package:jobhunt_mobile/repo/repositiories.dart';
@@ -54,12 +52,12 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     jobDatabaseHelper.initDatabase();
 
-    final refreshBloc = BlocProvider.of<UserBloc>(context);
+    final localDbBloc = BlocProvider.of<LocalDbBloc>(context);
 
     return BlocProvider(
-      create: (context) => UserBloc(
+      create: (context) => LocalDbBloc(
         UserRepository(),
-      )..add(LoadUserEvent()),
+      )..add(InitLocalDb()),
       child: Scaffold(
         bottomNavigationBar: NavigationBar(
           selectedIndex: _selectedIndex,
@@ -72,15 +70,10 @@ class _HomePageState extends State<HomePage> {
           },
           destinations: [
             NavigationDestination(
-              icon: Icon(Icons.work_outline),
-              label: 'Jobs',
-              selectedIcon: Icon(Icons.work),
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home),
+              label: 'Home',
             ),
-            // NavigationDestination(
-            //   icon: Icon(Icons.bookmark_outline),
-            //   selectedIcon: Icon(Icons.bookmark),
-            //   label: 'Bookmarks',
-            // ),
             NavigationDestination(
               icon: Icon(Icons.person_outline),
               selectedIcon: Icon(Icons.person),
@@ -124,7 +117,7 @@ class _HomePageState extends State<HomePage> {
             _selectedIndex == 0
                 ? IconButton(
                     onPressed: () {
-                      refreshBloc.add(ReloadUserEvent());
+                      localDbBloc.add(ResetJobs());
                     },
                     icon: Icon(Icons.replay_outlined),
                   )
@@ -135,21 +128,17 @@ class _HomePageState extends State<HomePage> {
           physics: NeverScrollableScrollPhysics(),
           controller: PageController(initialPage: _selectedIndex),
           children: [
-            BlocBuilder<UserBloc, UserState>(
-              bloc: refreshBloc,
+            BlocBuilder<LocalDbBloc, LocalDbState>(
+              bloc: localDbBloc,
               builder: (context, state) {
-                if (state is UserLoadingState) {
-                  print("UserLoadingState");
+                if (state is LocalDbLoading) {
+                  print("LocalDbLoading");
                   return Center(
                     child: CircularProgressIndicator(),
                   );
                 }
-                if (state is UserErrorState) {
-                  print("UserErrorState");
-                  return Center(child: Text("Error"));
-                }
-                if (state is UserLoadedState) {
-                  print("UserLoadedState");
+                if (state is LocalDbLoaded) {
+                  print("LocalDbLoaded");
                   List<JobModel> userList = state.jobs;
                   return ListView.builder(
                     itemCount: userList.length,
@@ -165,10 +154,12 @@ class _HomePageState extends State<HomePage> {
                             child: ListTile(
                               title: Text(userList[index].title),
                               subtitle: Text(userList[index].company),
-                              leading: CircleAvatar(
-                                backgroundImage:
-                                    NetworkImage(userList[index].imageUrl),
-                              ),
+                              leading: userList[index].imageUrl.isEmpty
+                                  ? Icon(Icons.dangerous)
+                                  : CircleAvatar(
+                                      backgroundImage: NetworkImage(
+                                          userList[index].imageUrl),
+                                    ),
                             ),
                           ),
                         ),
@@ -180,9 +171,6 @@ class _HomePageState extends State<HomePage> {
                 return Container();
               },
             ),
-            // Container(
-            //   color: Colors.green,
-            // ),
             ProfileReadView(),
           ],
         ),

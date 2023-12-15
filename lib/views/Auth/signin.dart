@@ -3,8 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jobhunt_mobile/blocs/auth/authentication_Event.dart';
 import 'package:jobhunt_mobile/blocs/auth/authentication_bloc.dart';
 import 'package:jobhunt_mobile/blocs/auth/authentication_state.dart';
-import 'package:jobhunt_mobile/blocs/home/app_blocs.dart';
-import 'package:jobhunt_mobile/blocs/home/app_events.dart';
+
 import 'package:jobhunt_mobile/repo/repositiories.dart';
 import 'package:jobhunt_mobile/views/homepage.dart';
 
