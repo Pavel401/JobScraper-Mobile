@@ -4,24 +4,22 @@ import 'package:jobhunt_mobile/blocs/auth/authentication_Event.dart';
 import 'package:jobhunt_mobile/blocs/auth/authentication_bloc.dart';
 import 'package:jobhunt_mobile/blocs/auth/authentication_state.dart';
 
-import 'package:jobhunt_mobile/repo/repositiories.dart';
-import 'package:jobhunt_mobile/views/homepage.dart';
-
-class SignInScreen extends StatefulWidget {
+class SignupScreen extends StatefulWidget {
   static String id = 'login_screen';
 
-  const SignInScreen({
-    Key? key,
-  }) : super(key: key);
+  const SignupScreen({Key? key}) : super(key: key);
 
   @override
-  State<SignInScreen> createState() => _SignInScreenState();
+  State<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _SignInScreenState extends State<SignInScreen> {
+class _SignupScreenState extends State<SignupScreen> {
   // Text Controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+
+  // Flag to toggle between sign-up and sign-in modes
+  bool isSignUpMode = true;
 
   @override
   void dispose() {
@@ -34,8 +32,8 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Login to Your Account',
+        title: Text(
+          isSignUpMode ? 'Sign Up' : 'Sign In',
           style: TextStyle(
             color: Colors.deepPurple,
           ),
@@ -65,13 +63,13 @@ class _SignInScreenState extends State<SignInScreen> {
                 border: OutlineInputBorder(),
                 hintText: 'Enter your password',
               ),
-              obscureText: false,
+              obscureText: true,
             ),
             const SizedBox(height: 10),
             GestureDetector(
               onTap: () {},
-              child: const Text(
-                'Forgot password?',
+              child: Text(
+                isSignUpMode ? 'Already have an account?' : 'Forgot password?',
                 style: TextStyle(
                   color: Colors.deepPurple,
                 ),
@@ -84,12 +82,13 @@ class _SignInScreenState extends State<SignInScreen> {
                   print('success');
                 } else if (state is AuthenticationFailureState) {
                   showDialog(
-                      context: context,
-                      builder: (context) {
-                        return const AlertDialog(
-                          content: Text('error'),
-                        );
-                      });
+                    context: context,
+                    builder: (context) {
+                      return const AlertDialog(
+                        content: Text('error'),
+                      );
+                    },
+                  );
                 }
               },
               builder: (context, state) {
@@ -98,17 +97,28 @@ class _SignInScreenState extends State<SignInScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      BlocProvider.of<AuthenticationBloc>(context).add(
-                        SignInUser(
-                          emailController.text.trim(),
-                          passwordController.text.trim(),
-                        ),
-                      );
+                      if (isSignUpMode) {
+                        BlocProvider.of<AuthenticationBloc>(context).add(
+                          SignUpUser(
+                            emailController.text.trim(),
+                            passwordController.text.trim(),
+                          ),
+                        );
+                      } else {
+                        BlocProvider.of<AuthenticationBloc>(context).add(
+                          SignInUser(
+                            emailController.text.trim(),
+                            passwordController.text.trim(),
+                          ),
+                        );
+                      }
                     },
                     child: Text(
                       state is AuthenticationLoadingState
                           ? '.......'
-                          : 'Sign In',
+                          : isSignUpMode
+                              ? 'Sign Up'
+                              : 'Sign In',
                       style: TextStyle(
                         fontSize: 20,
                       ),
@@ -118,21 +128,22 @@ class _SignInScreenState extends State<SignInScreen> {
               },
             ),
             const SizedBox(height: 20),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.center,
-            //   children: [
-            //     const Text("Dont have an account? "),
-            //     GestureDetector(
-            //       onTap: () {},
-            //       child: const Text(
-            //         'Login',
-            //         style: TextStyle(
-            //           color: Colors.deepPurple,
-            //         ),
-            //       ),
-            //     )
-            //   ],
-            // ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('Switch to '),
+                Switch(
+                  value: isSignUpMode,
+                  onChanged: (value) {
+                    setState(() {
+                      isSignUpMode = value;
+                    });
+                  },
+                ),
+                const Text('Sign Up'),
+              ],
+            ),
           ],
         ),
       ),

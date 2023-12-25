@@ -44,7 +44,9 @@ dependencies:
   flutter_slidable: ^3.0.1
   flutter_svg: ^2.0.9
   font_awesome_flutter: ^10.6.0
+  get: ^4.6.6
   google_fonts: ^6.1.0
+  google_sign_in: ^6.2.1
   image_picker: ^1.0.4
   shared_preferences: ^2.2.2
   shimmer: ^3.0.0

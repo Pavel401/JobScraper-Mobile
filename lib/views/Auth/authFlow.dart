@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:jobhunt_mobile/blocs/db/local_db_bloc.dart';
 import 'package:jobhunt_mobile/repo/repositiories.dart';
-import 'package:jobhunt_mobile/views/Auth/signup.dart';
+import 'package:jobhunt_mobile/views/Auth/auth_views.dart';
 import 'package:jobhunt_mobile/views/homepage.dart';
 
 class AuthenticationFlowScreen extends StatelessWidget {
