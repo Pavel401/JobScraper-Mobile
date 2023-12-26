@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:jobhunt_mobile/model/jobModel.dart';
 import 'package:jobhunt_mobile/utility/utility.dart';
 import 'package:jobhunt_mobile/views/Pdf/pdfview.dart';
 import 'package:jobhunt_mobile/views/Profile/profile_editView.dart';
@@ -17,17 +18,25 @@ class ProfileReadView extends StatefulWidget {
 
 class _ProfileReadViewState extends State<ProfileReadView> {
   late Future<RawModel?> _userFuture;
+  late Future<List<JobModel>> _jobFuture;
 
   @override
   void initState() {
     super.initState();
     _userFuture = init();
+    _jobFuture = initJobs();
+  }
+
+  Future<List<JobModel>> initJobs() async {
+    return CrudProvider.getJobsByRecruiter(
+        FirebaseAuth.instance.currentUser!.uid);
   }
 
   Future<RawModel?> init() async {
     return CrudProvider.getUserFromDB(FirebaseAuth.instance.currentUser!.uid);
   }
 
+  UserModel? user;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,136 +51,309 @@ class _ProfileReadViewState extends State<ProfileReadView> {
             return Center(child: Text('No user data available'));
           } else {
             RawModel raw = snapshot.data!;
+            bool isRecruiter = raw.isRecruiter!;
 
-            UserModel user = raw.user!;
-            return ListView(
-              children: [
-                Container(
-                  // height: 30.h,
-                  width: 100.w,
-                  padding: EdgeInsets.only(
-                    left: 5.w,
-                    right: 5.w,
-                    bottom: 2.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor,
-                  ),
-                  child: Column(
+            if (raw.isRecruiter == true) {
+            } else {
+              user = raw.user;
+            }
+
+            return raw!.isRecruiter == true
+                ? ListView(
                     children: [
-                      SizedBox(
-                        height: 1.h,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          IconButton.filledTonal(
-                            isSelected: false,
-                            icon: const Icon(Icons.edit_outlined),
-                            selectedIcon: const Icon(Icons.edit),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) {
-                                    return EditProfileView();
-                                  },
-                                ),
-                              ).then((value) {
-                                setState(() {
-                                  _userFuture = init();
-                                });
-
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Profile updated'),
-                                  ),
-                                );
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Stack(
-                            children: [
-                              CircleAvatar(
-                                radius: 50.0,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.white,
-                                      width: 2.0,
-                                    ),
-                                  ),
-                                  child: Image.asset(
-                                    "assets/png/man_1.png",
-                                    width: 100.0,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                      SizedBox(
-                        height: 1.h,
-                      ),
-                      Text(
-                        user.displayName!,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                      Container(
+                        // height: 30.h,
+                        width: 100.w,
+                        padding: EdgeInsets.only(
+                          left: 2.w,
+                          right: 2.w,
+                          bottom: 2.h,
                         ),
-                      ),
-                      Text(
-                        user.about!,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 8.sp,
-                          fontWeight: FontWeight.w400,
+                        decoration: BoxDecoration(),
+                        child: Column(
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                _showAddJobDialog(context, raw);
+                              },
+                              icon: Icon(Icons.add),
+                              label: Text("Add Job"),
+                            ),
+                            _buildJobsList(raw.recruiter!.id.toString()),
+                          ],
                         ),
                       ),
                     ],
-                  ),
+                  )
+                : ListView(
+                    children: [
+                      Container(
+                        // height: 30.h,
+                        width: 100.w,
+                        padding: EdgeInsets.only(
+                          left: 5.w,
+                          right: 5.w,
+                          bottom: 2.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: 1.h,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                IconButton.filledTonal(
+                                  isSelected: false,
+                                  icon: const Icon(Icons.edit_outlined),
+                                  selectedIcon: const Icon(Icons.edit),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) {
+                                          return EditProfileView();
+                                        },
+                                      ),
+                                    ).then((value) {
+                                      setState(() {
+                                        _userFuture = init();
+                                      });
+
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text('Profile updated'),
+                                        ),
+                                      );
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Stack(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 50.0,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: Colors.white,
+                                            width: 2.0,
+                                          ),
+                                        ),
+                                        child: Image.asset(
+                                          "assets/png/man_1.png",
+                                          width: 100.0,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                            SizedBox(
+                              height: 1.h,
+                            ),
+                            Text(
+                              user!.displayName!,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              user!.about!,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 8.sp,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 2.h,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          children: [
+                            BaiscInfo(user: user!),
+                            SizedBox(
+                              height: 2.h,
+                            ),
+                            ContactInfo(user: user!),
+                            SizedBox(
+                              height: 2.h,
+                            ),
+                            SocialInfo(user: user!),
+                            SizedBox(
+                              height: 2.h,
+                            ),
+                            ResumeInfo(user: user!),
+                            SizedBox(
+                              height: 2.h,
+                            ),
+                            SkillsInfo(user: user!),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+          }
+        },
+      ),
+    );
+  }
+
+  void _showAddJobDialog(BuildContext context, RawModel user) {
+    TextEditingController jobNameController = TextEditingController();
+    TextEditingController jobDescriptionController = TextEditingController();
+    TextEditingController jobSkillsController = TextEditingController();
+    TextEditingController jobSalaryController = TextEditingController();
+    TextEditingController comapny = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Add Job'),
+          content: SizedBox(
+            width: 100.w,
+            height: 40.h,
+            child: Column(
+              children: [
+                TextField(
+                  controller: jobNameController,
+                  decoration: InputDecoration(labelText: 'Job Name'),
                 ),
                 SizedBox(
                   height: 2.h,
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      BaiscInfo(user: user),
-                      SizedBox(
-                        height: 2.h,
-                      ),
-                      ContactInfo(user: user),
-                      SizedBox(
-                        height: 2.h,
-                      ),
-                      SocialInfo(user: user),
-                      SizedBox(
-                        height: 2.h,
-                      ),
-                      ResumeInfo(user: user),
-                      SizedBox(
-                        height: 2.h,
-                      ),
-                      SkillsInfo(user: user),
-                    ],
-                  ),
+                TextField(
+                  controller: comapny,
+                  decoration: InputDecoration(labelText: 'Company Name'),
+                ),
+                SizedBox(
+                  height: 2.h,
+                ),
+                TextField(
+                  controller: jobDescriptionController,
+                  decoration: InputDecoration(labelText: 'Job Description'),
                 ),
               ],
-            );
-          }
-        },
-      ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Process the job details here
+                String jobName = jobNameController.text;
+                String jobDescription = jobDescriptionController.text;
+                String jobSkills = jobSkillsController.text;
+                double jobSalary =
+                    double.tryParse(jobSalaryController.text) ?? 0.0;
+
+                // Generate new job data
+                String newJobId =
+                    UniqueKey().toString(); // Generate a unique ID
+                String newJobLocation =
+                    "Some Location"; // Set the location as needed
+
+                // Create a new JobModel with the generated data
+                JobModel newJob = JobModel(
+                  id: newJobId,
+                  title: jobName,
+                  location: newJobLocation,
+                  createdAt: DateTime.now().millisecondsSinceEpoch,
+                  company: comapny.text,
+                  applyUrl: user.recruiter!.email!,
+                  imageUrl: "",
+
+                  // Add other properties as needed
+                );
+
+                CrudProvider.addJob(user, newJob);
+                setState(() {
+                  _jobFuture = initJobs();
+                });
+                // Close the dialog
+                Navigator.of(context).pop();
+              },
+              child: Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  FutureBuilder<List<JobModel>> _buildJobsList(String recruiterId) {
+    return FutureBuilder<List<JobModel>>(
+      future: _jobFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error fetching jobs');
+        } else {
+          List<JobModel> jobs = snapshot.data ?? [];
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 2.h),
+              Text(
+                'Jobs by Recruiter:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 1.h),
+              for (var job in jobs)
+                Card(
+                  child: ListTile(
+                    title: Text(job.title),
+                    subtitle: Text(job.company),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete),
+                      onPressed: () {
+                        // Delete the job
+                        CrudProvider.deleteJob(recruiterId, job.id);
+                        setState(() {
+                          _jobFuture = initJobs();
+                        });
+                      },
+                    ),
+                    onTap: () {
+                      // Navigate to job details page
+                    },
+
+                    // Add other job details as needed
+                  ),
+                ),
+            ],
+          );
+        }
+      },
     );
   }
 }

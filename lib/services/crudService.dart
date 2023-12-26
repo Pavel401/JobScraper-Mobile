@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:jobhunt_mobile/model/jobModel.dart';
 import 'package:jobhunt_mobile/model/userModel.dart';
 
 class CrudProvider {
@@ -24,5 +25,53 @@ class CrudProvider {
     await usersCollection
         .doc(updatedUser.user!.id)
         .update(updatedUser.toJson());
+  }
+
+  static Future<void> addJob(RawModel user, JobModel job) async {
+    await usersCollection
+        .doc(user.recruiter!.id)
+        .collection("jobs")
+        .doc(job.id) // Using job.id as the document ID
+        .set(job.toJson());
+  }
+
+  static Future<List<JobModel>> getJobsByRecruiter(String recruiterId) async {
+    QuerySnapshot jobSnapshot =
+        await usersCollection.doc(recruiterId).collection("jobs").get();
+
+    List<JobModel> jobs = jobSnapshot.docs
+        .map((doc) => JobModel.fromJson(doc.data() as Map<String, dynamic>))
+        .toList();
+
+    return jobs;
+  }
+
+  static Future<List<JobModel>> getJobsForAllRecruiters() async {
+    QuerySnapshot recruiterSnapshot =
+        await usersCollection.where("isRecruiter", isEqualTo: true).get();
+
+    List<JobModel> allJobs = [];
+
+    for (QueryDocumentSnapshot recruiterDoc in recruiterSnapshot.docs) {
+      String recruiterId = recruiterDoc.id;
+      QuerySnapshot jobSnapshot =
+          await usersCollection.doc(recruiterId).collection("jobs").get();
+
+      List<JobModel> jobs = jobSnapshot.docs
+          .map((doc) => JobModel.fromJson(doc.data() as Map<String, dynamic>))
+          .toList();
+
+      allJobs.addAll(jobs);
+    }
+
+    return allJobs;
+  }
+
+  static Future<void> deleteJob(String recruiterId, String jobId) async {
+    await usersCollection
+        .doc(recruiterId)
+        .collection("jobs")
+        .doc(jobId)
+        .delete();
   }
 }

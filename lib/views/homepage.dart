@@ -1,11 +1,14 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:jobhunt_mobile/blocs/db/local_db_bloc.dart';
 
 import 'package:jobhunt_mobile/model/jobModel.dart';
+import 'package:jobhunt_mobile/model/userModel.dart';
 import 'package:jobhunt_mobile/repo/repositiories.dart';
 import 'package:jobhunt_mobile/services/authentication.dart';
+import 'package:jobhunt_mobile/services/crudService.dart';
 import 'package:jobhunt_mobile/services/dbHelper.dart';
 import 'package:jobhunt_mobile/views/Profile/profile_readView.dart';
 import 'package:jobhunt_mobile/views/Settings/settings.dart';
@@ -23,6 +26,17 @@ class _HomePageState extends State<HomePage> {
   int _drawerIndex = 0;
 
   final jobDatabaseHelper = JobDatabaseHelper();
+  RawModel? rawModel;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  Future<void> init() async {
+    rawModel = await CrudProvider.getUserFromDB(
+        FirebaseAuth.instance.currentUser!.uid);
+  }
 
   @override
   Widget build(BuildContext context) {
