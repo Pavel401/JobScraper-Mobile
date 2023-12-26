@@ -218,6 +218,82 @@ class _ProfileReadViewState extends State<ProfileReadView> {
     );
   }
 
+  Future<void> _showEditJobDialog(
+      BuildContext context, String userId, JobModel job) async {
+    TextEditingController jobNameController =
+        TextEditingController(text: job.title);
+    TextEditingController jobDescriptionController =
+        TextEditingController(text: job.location);
+    TextEditingController companyController =
+        TextEditingController(text: job.company);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Edit Job'),
+          content: SizedBox(
+            width: 100.w,
+            height: 40.h,
+            child: Column(
+              children: [
+                TextField(
+                  controller: jobNameController,
+                  decoration: InputDecoration(labelText: 'Job Name'),
+                ),
+                SizedBox(height: 2.h),
+                TextField(
+                  controller: companyController,
+                  decoration: InputDecoration(labelText: 'Company Name'),
+                ),
+                SizedBox(height: 2.h),
+                TextField(
+                  controller: jobDescriptionController,
+                  decoration: InputDecoration(labelText: 'Job Description'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Process the updated job details here
+                String updatedJobName = jobNameController.text;
+                String updatedJobDescription = jobDescriptionController.text;
+
+                // Create an updated JobModel
+                JobModel updatedJob = JobModel(
+                  id: job.id,
+                  title: updatedJobName,
+                  location: updatedJobDescription,
+                  createdAt: job.createdAt,
+                  company: companyController.text,
+                  applyUrl: job.applyUrl,
+                  imageUrl: job.imageUrl,
+                  // Add other properties as needed
+                );
+
+                CrudProvider.updateJob(userId.toString(), job.id, updatedJob);
+                setState(() {
+                  _jobFuture = initJobs();
+                });
+                // Close the dialog
+                Navigator.of(context).pop();
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _showAddJobDialog(BuildContext context, RawModel user) async {
     TextEditingController jobNameController = TextEditingController();
     TextEditingController jobDescriptionController = TextEditingController();
@@ -335,7 +411,8 @@ class _ProfileReadViewState extends State<ProfileReadView> {
                       },
                     ),
                     onTap: () {
-                      // Navigate to job details page
+                      _showEditJobDialog(context, recruiterId!, job);
+                      print(job.id);
                     },
 
                     // Add other job details as needed

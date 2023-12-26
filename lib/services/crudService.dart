@@ -74,4 +74,13 @@ class CrudProvider {
         .doc(jobId)
         .delete();
   }
+
+  static Future<void> updateJob(
+      String recruiterId, String jobId, JobModel updatedJob) async {
+    await usersCollection
+        .doc(recruiterId)
+        .collection("jobs")
+        .doc(jobId)
+        .update(updatedJob.toJson());
+  }
 }
