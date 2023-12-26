@@ -20,6 +20,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   // Flag to toggle between sign-up and sign-in modes
   bool isSignUpMode = true;
+  bool isRecruiter = false;
 
   @override
   void dispose() {
@@ -66,14 +67,19 @@ class _SignupScreenState extends State<SignupScreen> {
               obscureText: true,
             ),
             const SizedBox(height: 10),
-            GestureDetector(
-              onTap: () {},
-              child: Text(
-                isSignUpMode ? 'Already have an account?' : 'Forgot password?',
-                style: TextStyle(
-                  color: Colors.deepPurple,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const Text('Are you a recruiter?'),
+                Switch(
+                  value: isRecruiter,
+                  onChanged: (value) {
+                    setState(() {
+                      isRecruiter = value;
+                    });
+                  },
                 ),
-              ),
+              ],
             ),
             const SizedBox(height: 20),
             BlocConsumer<AuthenticationBloc, AuthenticationState>(
@@ -102,6 +108,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           SignUpUser(
                             emailController.text.trim(),
                             passwordController.text.trim(),
+                            isRecruiter,
                           ),
                         );
                       } else {

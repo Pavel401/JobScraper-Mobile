@@ -6,9 +6,10 @@ abstract class AuthenticationEvent {
 
 class SignUpUser extends AuthenticationEvent {
   final String email;
+  final bool isRecruiter;
   final String password;
 
-  const SignUpUser(this.email, this.password);
+  const SignUpUser(this.email, this.password, this.isRecruiter);
 
   @override
   List<Object> get props => [email, password];

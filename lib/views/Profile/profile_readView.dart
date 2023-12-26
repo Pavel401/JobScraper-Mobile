@@ -16,7 +16,7 @@ class ProfileReadView extends StatefulWidget {
 }
 
 class _ProfileReadViewState extends State<ProfileReadView> {
-  late Future<UserModel?> _userFuture;
+  late Future<RawModel?> _userFuture;
 
   @override
   void initState() {
@@ -24,14 +24,14 @@ class _ProfileReadViewState extends State<ProfileReadView> {
     _userFuture = init();
   }
 
-  Future<UserModel?> init() async {
+  Future<RawModel?> init() async {
     return CrudProvider.getUserFromDB(FirebaseAuth.instance.currentUser!.uid);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<UserModel?>(
+      body: FutureBuilder<RawModel?>(
         future: _userFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -41,7 +41,9 @@ class _ProfileReadViewState extends State<ProfileReadView> {
           } else if (!snapshot.hasData || snapshot.data == null) {
             return Center(child: Text('No user data available'));
           } else {
-            UserModel user = snapshot.data!;
+            RawModel raw = snapshot.data!;
+
+            UserModel user = raw.user!;
             return ListView(
               children: [
                 Container(

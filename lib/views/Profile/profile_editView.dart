@@ -35,7 +35,7 @@ class _EditProfileViewState extends State<EditProfileView> {
 
   List<String> _skills = [];
   UserModel? user;
-  late Future<UserModel?> _userFuture;
+  late Future<RawModel?> _userFuture;
   DateTime? pickedDate;
 
   bool isSaving = false;
@@ -45,7 +45,7 @@ class _EditProfileViewState extends State<EditProfileView> {
     _userFuture = init();
   }
 
-  Future<UserModel?> init() async {
+  Future<RawModel?> init() async {
     return CrudProvider.getUserFromDB(FirebaseAuth.instance.currentUser!.uid);
   }
 
@@ -60,7 +60,7 @@ class _EditProfileViewState extends State<EditProfileView> {
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: FutureBuilder<UserModel?>(
+          child: FutureBuilder<RawModel?>(
             future: _userFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -70,7 +70,10 @@ class _EditProfileViewState extends State<EditProfileView> {
               } else if (!snapshot.hasData || snapshot.data == null) {
                 return Center(child: Text('No user data available'));
               } else {
-                UserModel user = snapshot.data!;
+                RawModel raw = snapshot.data!;
+
+                UserModel user = raw.user!;
+
                 if (shouldRebuild) {
                   _cityController =
                       TextEditingController(text: user.city ?? '');
@@ -357,8 +360,11 @@ class _EditProfileViewState extends State<EditProfileView> {
                                 );
 
                                 try {
-                                  await CrudProvider.updateUserInDB(
-                                      updatedUser);
+                                  RawModel raw = RawModel(
+                                      user: updatedUser,
+                                      isRecruiter: false,
+                                      recruiter: null);
+                                  await CrudProvider.updateUserInDB(raw);
 
                                   Navigator.pop(context);
                                   // setState(() {

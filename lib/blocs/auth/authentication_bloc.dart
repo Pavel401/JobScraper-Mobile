@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:bloc/bloc.dart';
 import 'package:jobhunt_mobile/blocs/auth/authentication_Event.dart';
 import 'package:jobhunt_mobile/blocs/auth/authentication_state.dart';
@@ -14,8 +16,8 @@ class AuthenticationBloc
     on<SignUpUser>((event, emit) async {
       emit(AuthenticationLoadingState(isLoading: true));
       try {
-        final UserModel? user =
-            await authService.signUpUser(event.email, event.password);
+        final RawModel? user = await authService.signUpUser(
+            event.email, event.password, event.isRecruiter);
 
         if (user != null) {
           emit(AuthenticationSuccessState(user));
@@ -30,7 +32,7 @@ class AuthenticationBloc
     on<SignInUser>((event, emit) async {
       emit(AuthenticationLoadingState(isLoading: true));
       try {
-        final UserModel? user =
+        final RawModel? user =
             await authService.signInUser(event.email, event.password);
 
         if (user != null) {
