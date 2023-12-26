@@ -12,6 +12,7 @@ import 'package:jobhunt_mobile/services/crudService.dart';
 import 'package:jobhunt_mobile/services/dbHelper.dart';
 import 'package:jobhunt_mobile/views/Profile/profile_readView.dart';
 import 'package:jobhunt_mobile/views/Settings/settings.dart';
+import 'package:jobhunt_mobile/views/company_specific_jobs.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
@@ -85,6 +86,10 @@ class _HomePageState extends State<HomePage> {
             NavigationDrawerDestination(
               icon: Icon(Icons.settings),
               label: Text('Settings'),
+            ),
+            NavigationDrawerDestination(
+              icon: Icon(Icons.work_outlined),
+              label: Text('Company Specific Jobs'),
             ),
             NavigationDrawerDestination(
               icon: FaIcon(FontAwesomeIcons.github),
@@ -183,11 +188,21 @@ class _HomePageState extends State<HomePage> {
       );
     }
     if (index == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) {
+            return CompanySpecificJobs();
+          },
+        ),
+      );
+    }
+    if (index == 2) {
       if (!await launchUrl(
           Uri.parse("https://github.com/Pavel401/JobScraper-Mobile"))) {}
     }
 
-    if (index == 2) {
+    if (index == 3) {
       final AuthService authService = AuthService();
       authService.signOutUser();
     }

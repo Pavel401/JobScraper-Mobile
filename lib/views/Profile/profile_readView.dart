@@ -8,6 +8,7 @@ import 'package:sizer/sizer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:jobhunt_mobile/model/userModel.dart';
 import 'package:jobhunt_mobile/services/crudService.dart';
+import 'package:uuid/uuid.dart';
 
 class ProfileReadView extends StatefulWidget {
   const ProfileReadView({Key? key}) : super(key: key);
@@ -217,12 +218,12 @@ class _ProfileReadViewState extends State<ProfileReadView> {
     );
   }
 
-  void _showAddJobDialog(BuildContext context, RawModel user) {
+  Future<void> _showAddJobDialog(BuildContext context, RawModel user) async {
     TextEditingController jobNameController = TextEditingController();
     TextEditingController jobDescriptionController = TextEditingController();
     TextEditingController jobSkillsController = TextEditingController();
     TextEditingController jobSalaryController = TextEditingController();
-    TextEditingController comapny = TextEditingController();
+    TextEditingController company = TextEditingController();
 
     showDialog(
       context: context,
@@ -238,16 +239,12 @@ class _ProfileReadViewState extends State<ProfileReadView> {
                   controller: jobNameController,
                   decoration: InputDecoration(labelText: 'Job Name'),
                 ),
-                SizedBox(
-                  height: 2.h,
-                ),
+                SizedBox(height: 2.h),
                 TextField(
-                  controller: comapny,
+                  controller: company,
                   decoration: InputDecoration(labelText: 'Company Name'),
                 ),
-                SizedBox(
-                  height: 2.h,
-                ),
+                SizedBox(height: 2.h),
                 TextField(
                   controller: jobDescriptionController,
                   decoration: InputDecoration(labelText: 'Job Description'),
@@ -267,23 +264,17 @@ class _ProfileReadViewState extends State<ProfileReadView> {
                 // Process the job details here
                 String jobName = jobNameController.text;
                 String jobDescription = jobDescriptionController.text;
-                String jobSkills = jobSkillsController.text;
-                double jobSalary =
-                    double.tryParse(jobSalaryController.text) ?? 0.0;
 
-                // Generate new job data
-                String newJobId =
-                    UniqueKey().toString(); // Generate a unique ID
-                String newJobLocation =
-                    "Some Location"; // Set the location as needed
+                // Generate alphanumeric job ID using uuid package
+                String newJobId = Uuid().v4();
 
                 // Create a new JobModel with the generated data
                 JobModel newJob = JobModel(
                   id: newJobId,
                   title: jobName,
-                  location: newJobLocation,
+                  location: jobDescription,
                   createdAt: DateTime.now().millisecondsSinceEpoch,
-                  company: comapny.text,
+                  company: company.text,
                   applyUrl: user.recruiter!.email!,
                   imageUrl: "",
 
