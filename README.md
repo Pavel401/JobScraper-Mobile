@@ -2,7 +2,7 @@
 
 JobHunt Mobile is a companion mobile application designed to enhance the user experience of the Jobs Scraper project. This mobile app provides a convenient interface for job seekers to access and manage job postings scraped by the Jobs Scraper. With JobHunt Mobile, users can browse, search, and filter job opportunities on the go.
 
-Original Repo : https://github.com/Pavel401/JobScraper-Mobile
+Original Repo :[ https://github.com/Pavel401/JobScraper-Mobile](https://github.com/Pavel401/Jobs-Scraper)
 
 
 ## Usage & Screenshots
