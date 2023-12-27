@@ -1,4 +1,4 @@
-package com.example.jobhunt_mobile
+package com.jobhunt.mobile
 
 import io.flutter.embedding.android.FlutterActivity
 
