@@ -1,18 +1,15 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:jobhunt_mobile/blocs/Bookmarks/bookmarks_bloc.dart';
 import 'package:jobhunt_mobile/blocs/db/local_db_bloc.dart';
 
 import 'package:jobhunt_mobile/model/jobModel.dart';
-import 'package:jobhunt_mobile/model/userModel.dart';
-import 'package:jobhunt_mobile/repo/repositiories.dart';
-import 'package:jobhunt_mobile/services/authentication.dart';
-import 'package:jobhunt_mobile/services/crudService.dart';
+import 'package:jobhunt_mobile/repo/jobRepository.dart';
+
 import 'package:jobhunt_mobile/services/dbHelper.dart';
-import 'package:jobhunt_mobile/views/Profile/profile_readView.dart';
+import 'package:jobhunt_mobile/views/Bookmark/bookmarks_screen.dart';
 import 'package:jobhunt_mobile/views/Settings/settings.dart';
-import 'package:jobhunt_mobile/views/company_specific_jobs.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
@@ -26,27 +23,22 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   int _drawerIndex = 0;
 
-  final jobDatabaseHelper = JobDatabaseHelper();
-  RawModel? rawModel;
+  final jobDatabaseHelper = LocalDBHelper();
 
   @override
   void initState() {
     super.initState();
   }
 
-  Future<void> init() async {
-    rawModel = await CrudProvider.getUserFromDB(
-        FirebaseAuth.instance.currentUser!.uid);
-  }
-
   @override
   Widget build(BuildContext context) {
     jobDatabaseHelper.initDatabase();
 
-    final localDbBloc = BlocProvider.of<LocalDbBloc>(context);
+    final localDbBloc = BlocProvider.of<JobCRUDBloc>(context);
+    final bookmarkBloc = BlocProvider.of<BookmarksBloc>(context);
 
     return BlocProvider(
-      create: (context) => LocalDbBloc(
+      create: (context) => JobCRUDBloc(
         UserRepository(),
       )..add(InitLocalDb()),
       child: Scaffold(
@@ -66,9 +58,9 @@ class _HomePageState extends State<HomePage> {
               label: 'Home',
             ),
             NavigationDestination(
-              icon: Icon(Icons.person_outline),
-              selectedIcon: Icon(Icons.person),
-              label: 'Profile',
+              icon: Icon(Icons.bookmark_border_outlined),
+              selectedIcon: Icon(Icons.bookmark),
+              label: 'Bookmarks',
             ),
           ],
         ),
@@ -88,16 +80,8 @@ class _HomePageState extends State<HomePage> {
               label: Text('Settings'),
             ),
             NavigationDrawerDestination(
-              icon: Icon(Icons.work_outlined),
-              label: Text('Company Specific Jobs'),
-            ),
-            NavigationDrawerDestination(
               icon: FaIcon(FontAwesomeIcons.github),
               label: Text('Github'),
-            ),
-            NavigationDrawerDestination(
-              icon: Icon(Icons.logout),
-              label: Text('Logout'),
             ),
           ],
         ),
@@ -118,7 +102,7 @@ class _HomePageState extends State<HomePage> {
           physics: NeverScrollableScrollPhysics(),
           controller: PageController(initialPage: _selectedIndex),
           children: [
-            BlocBuilder<LocalDbBloc, LocalDbState>(
+            BlocBuilder<JobCRUDBloc, LocalDbState>(
               bloc: localDbBloc,
               builder: (context, state) {
                 if (state is LocalDbLoading) {
@@ -144,6 +128,15 @@ class _HomePageState extends State<HomePage> {
                             child: ListTile(
                               title: Text(userList[index].title),
                               subtitle: Text(userList[index].company),
+                              trailing: IconButton(
+                                onPressed: () {
+                                  bookmarkBloc.add(InsertBookmark(
+                                    userList[index],
+                                    context,
+                                  ));
+                                },
+                                icon: Icon(Icons.bookmark_border_outlined),
+                              ),
                               leading: userList[index].imageUrl.isEmpty
                                   ? Icon(Icons.dangerous)
                                   : CircleAvatar(
@@ -161,7 +154,7 @@ class _HomePageState extends State<HomePage> {
                 return Container();
               },
             ),
-            ProfileReadView(),
+            BookmarksScreen(),
           ],
         ),
       ),
@@ -187,24 +180,10 @@ class _HomePageState extends State<HomePage> {
         ),
       );
     }
+
     if (index == 1) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) {
-            return CompanySpecificJobs();
-          },
-        ),
-      );
-    }
-    if (index == 2) {
       if (!await launchUrl(
           Uri.parse("https://github.com/Pavel401/JobScraper-Mobile"))) {}
-    }
-
-    if (index == 3) {
-      final AuthService authService = AuthService();
-      authService.signOutUser();
     }
   }
 }

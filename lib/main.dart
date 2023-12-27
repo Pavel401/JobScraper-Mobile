@@ -2,31 +2,34 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:jobhunt_mobile/blocs/auth/authentication_bloc.dart';
+import 'package:jobhunt_mobile/blocs/Bookmarks/bookmarks_bloc.dart';
 import 'package:jobhunt_mobile/blocs/darkTheme/dark_theme_bloc.dart';
+import 'package:jobhunt_mobile/blocs/db/local_db_bloc.dart';
 
-import 'package:jobhunt_mobile/firebase_options.dart';
+import 'package:jobhunt_mobile/repo/jobRepository.dart';
 
-import 'package:jobhunt_mobile/views/Auth/authFlow.dart';
+import 'package:jobhunt_mobile/views/homepage.dart';
 
 import 'package:sizer/sizer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  print(dotenv.env['JOB_API'].toString() + ' is loaded from .env file.');
+
   runApp(
     MultiBlocProvider(
       providers: [
-        BlocProvider<AuthenticationBloc>(
-          create: (context) => AuthenticationBloc(),
-        ),
         BlocProvider<DarkThemeBloc>(
           // Add BlocProvider for DarkThemeBloc
           create: (context) => DarkThemeBloc(),
+        ),
+        BlocProvider<BookmarksBloc>(
+          // Add BlocProvider for DarkThemeBloc
+          create: (context) => BookmarksBloc()..add(GetBookmarks()),
         ),
       ],
       child: MyApp(),
@@ -50,45 +53,48 @@ class MyApp extends StatelessWidget {
           bool isDarkMode = state is SetDarkThemeState;
 
           return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-            theme: FlexThemeData.light(
-              scheme: FlexScheme.blue,
-              surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
-              blendLevel: 7,
-              subThemesData: const FlexSubThemesData(
-                blendOnLevel: 10,
-                blendOnColors: false,
-                useTextTheme: true,
-                useM2StyleDividerInM3: true,
-                alignedDropdown: true,
-                useInputDecoratorThemeInDialogs: true,
+              debugShowCheckedModeBanner: false,
+              themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+              theme: FlexThemeData.light(
+                scheme: FlexScheme.blue,
+                surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
+                blendLevel: 7,
+                subThemesData: const FlexSubThemesData(
+                  blendOnLevel: 10,
+                  blendOnColors: false,
+                  useTextTheme: true,
+                  useM2StyleDividerInM3: true,
+                  alignedDropdown: true,
+                  useInputDecoratorThemeInDialogs: true,
+                ),
+                visualDensity: FlexColorScheme.comfortablePlatformDensity,
+                useMaterial3: true,
+                swapLegacyOnMaterial3: true,
+                // To use the Playground font, add GoogleFonts package and uncomment
+                fontFamily: GoogleFonts.notoSans().fontFamily,
               ),
-              visualDensity: FlexColorScheme.comfortablePlatformDensity,
-              useMaterial3: true,
-              swapLegacyOnMaterial3: true,
-              // To use the Playground font, add GoogleFonts package and uncomment
-              fontFamily: GoogleFonts.notoSans().fontFamily,
-            ),
-            darkTheme: FlexThemeData.dark(
-              scheme: FlexScheme.blue,
-              surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
-              blendLevel: 13,
-              subThemesData: const FlexSubThemesData(
-                blendOnLevel: 20,
-                useTextTheme: true,
-                useM2StyleDividerInM3: true,
-                alignedDropdown: true,
-                useInputDecoratorThemeInDialogs: true,
+              darkTheme: FlexThemeData.dark(
+                scheme: FlexScheme.blue,
+                surfaceMode: FlexSurfaceMode.levelSurfacesLowScaffold,
+                blendLevel: 13,
+                subThemesData: const FlexSubThemesData(
+                  blendOnLevel: 20,
+                  useTextTheme: true,
+                  useM2StyleDividerInM3: true,
+                  alignedDropdown: true,
+                  useInputDecoratorThemeInDialogs: true,
+                ),
+                visualDensity: FlexColorScheme.comfortablePlatformDensity,
+                useMaterial3: true,
+                swapLegacyOnMaterial3: true,
+                // To use the Playground font, add GoogleFonts package and uncomment
+                fontFamily: GoogleFonts.notoSans().fontFamily,
               ),
-              visualDensity: FlexColorScheme.comfortablePlatformDensity,
-              useMaterial3: true,
-              swapLegacyOnMaterial3: true,
-              // To use the Playground font, add GoogleFonts package and uncomment
-              fontFamily: GoogleFonts.notoSans().fontFamily,
-            ),
-            home: AuthenticationFlowScreen(),
-          );
+              home: BlocProvider(
+                create: (context) =>
+                    JobCRUDBloc(UserRepository())..add(InitLocalDb()),
+                child: HomePage(),
+              ));
         },
       );
     });

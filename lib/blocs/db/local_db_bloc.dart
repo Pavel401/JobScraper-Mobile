@@ -1,18 +1,16 @@
-import 'dart:math';
-
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:jobhunt_mobile/model/jobModel.dart';
-import 'package:jobhunt_mobile/repo/repositiories.dart';
+import 'package:jobhunt_mobile/repo/jobRepository.dart';
 import 'package:jobhunt_mobile/services/dbHelper.dart';
 
 part 'local_db_event.dart';
 part 'local_db_state.dart';
 
-class LocalDbBloc extends Bloc<LocalDbEvent, LocalDbState> {
+class JobCRUDBloc extends Bloc<LocalDbEvent, LocalDbState> {
   final UserRepository _userRepository;
 
-  LocalDbBloc(this._userRepository) : super(LocalDbInitial()) {
+  JobCRUDBloc(this._userRepository) : super(LocalDbInitial()) {
     on<LocalDbEvent>((event, emit) {
       if (event is InsertJob) {
         insertJob(event.job);
@@ -44,7 +42,7 @@ class LocalDbBloc extends Bloc<LocalDbEvent, LocalDbState> {
     });
   }
 
-  JobDatabaseHelper jobDatabaseHelper = JobDatabaseHelper();
+  LocalDBHelper jobDatabaseHelper = LocalDBHelper();
 
   void insertJob(List<JobModel> job) {
     print("########## Inserting Jobs ##########");

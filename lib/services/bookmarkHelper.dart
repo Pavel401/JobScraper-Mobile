@@ -4,17 +4,17 @@ import 'package:jobhunt_mobile/model/jobModel.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-class LocalDBHelper {
-  static final LocalDBHelper _instance = LocalDBHelper._internal();
-  factory LocalDBHelper() => _instance;
+class BookmarkDbHelper {
+  static final BookmarkDbHelper _instance = BookmarkDbHelper._internal();
+  factory BookmarkDbHelper() => _instance;
 
   late Database _database;
 
-  LocalDBHelper._internal();
+  BookmarkDbHelper._internal();
 
   Future<void> initDatabase() async {
     _database = await openDatabase(
-      join(await getDatabasesPath(), 'job_database.db'),
+      join(await getDatabasesPath(), 'bookmark.db'),
       onCreate: (db, version) {
         return db.execute(
           '''
@@ -59,6 +59,15 @@ class LocalDBHelper {
   Future<void> clearJobs() async {
     await _database.delete('jobs');
     print("########## Cleared Jobs ##########");
+  }
+
+  Future<void> deleteJob(JobModel job) async {
+    await _database.delete(
+      'jobs',
+      where: 'id = ?',
+      whereArgs: [job.id],
+    );
+    print("########## Deleted Job ##########");
   }
 
   Future<List<JobModel>> getJobs() async {

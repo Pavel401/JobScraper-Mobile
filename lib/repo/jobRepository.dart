@@ -1,14 +1,16 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:jobhunt_mobile/model/jobModel.dart';
 
 class UserRepository {
-  String userUrl =
-      'https://jobs-scraper-production.up.railway.app/getallJobsFromSQL';
+  String userUrl = dotenv.env['JOB_API'].toString();
 
   Future<List<JobModel>> getJobs() async {
     try {
+      print("########## Fetching Jobs ##########");
+      print(userUrl);
       Response response = await Dio().get(userUrl);
-
+      print(response);
       if (response.statusCode == 200) {
         List<dynamic> data = response.data as List<dynamic>;
 
