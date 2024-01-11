@@ -8,6 +8,7 @@ import 'package:jobhunt_mobile/model/jobModel.dart';
 import 'package:jobhunt_mobile/repo/jobRepository.dart';
 
 import 'package:jobhunt_mobile/services/dbHelper.dart';
+import 'package:jobhunt_mobile/views/About/about_us.dart';
 import 'package:jobhunt_mobile/views/Bookmark/bookmarks_screen.dart';
 import 'package:jobhunt_mobile/views/Settings/settings.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -82,6 +83,10 @@ class _HomePageState extends State<HomePage> {
             NavigationDrawerDestination(
               icon: FaIcon(FontAwesomeIcons.github),
               label: Text('Github'),
+            ),
+            NavigationDrawerDestination(
+              icon: Icon(Icons.info_outline),
+              label: Text('About Us'),
             ),
           ],
         ),
@@ -184,6 +189,16 @@ class _HomePageState extends State<HomePage> {
     if (index == 1) {
       if (!await launchUrl(
           Uri.parse("https://github.com/Pavel401/JobScraper-Mobile"))) {}
+    }
+    if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) {
+            return AboutUs();
+          },
+        ),
+      );
     }
   }
 }
