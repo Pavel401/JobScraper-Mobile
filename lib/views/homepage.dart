@@ -91,7 +91,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         appBar: AppBar(
-          title: Text("Job Hunt"),
+          title: _selectedIndex == 0 ? Text("Job Hunt") : Text("Bookmarks"),
           actions: [
             _selectedIndex == 0
                 ? IconButton(
@@ -99,6 +99,22 @@ class _HomePageState extends State<HomePage> {
                       localDbBloc.add(ResetJobs());
                     },
                     icon: Icon(Icons.replay_outlined),
+                  )
+                : SizedBox.shrink(),
+            _selectedIndex == 0
+                ? IconButton(
+                    icon: Icon(Icons.search),
+                    onPressed: () async {
+                      final String? result = await showSearch<String>(
+                        context: context,
+                        delegate: JobSearchDelegate(localDbBloc: localDbBloc),
+                      );
+
+                      if (result != null && result.isNotEmpty) {
+                        // Handle the search result if needed
+                        // Example: _search(result);
+                      }
+                    },
                   )
                 : SizedBox.shrink(),
           ],
@@ -200,5 +216,44 @@ class _HomePageState extends State<HomePage> {
         ),
       );
     }
+  }
+}
+
+class JobSearchDelegate extends SearchDelegate<String> {
+  final JobCRUDBloc localDbBloc;
+
+  JobSearchDelegate({required this.localDbBloc});
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, '');
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    localDbBloc.add(SearchJobs(query));
+    return Container(); // Replace with your search result UI
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return Container(); // Replace with your suggestion UI
   }
 }
