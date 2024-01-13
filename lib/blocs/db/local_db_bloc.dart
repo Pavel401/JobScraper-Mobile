@@ -14,31 +14,13 @@ class JobCRUDBloc extends Bloc<LocalDbEvent, LocalDbState> {
     on<LocalDbEvent>((event, emit) {
       if (event is InsertJob) {
         insertJob(event.job);
+      } else if (event is ResetJobs) {
+        _resetJobs(emit);
+      } else if (event is InitLocalDb) {
+        _initLocalDb(emit);
+      } else if (event is SearchJobs) {
+        _searchJobs(event.query, emit);
       }
-    });
-
-    on<ResetJobs>((event, emit) async {
-      emit(LocalDbLoading());
-      await jobDatabaseHelper.clearJobs();
-      final users = await _userRepository.getJobs();
-      insertJob(users);
-      List<JobModel> jobs = await getJobs();
-      emit(LocalDbLoaded(jobs));
-    });
-
-    on<InitLocalDb>((event, emit) async {
-      emit(LocalDbLoading());
-
-      List<JobModel> jobs = await getJobs();
-      print("########## Initializing Local DB ${jobs.length} ##########");
-
-      if (jobs.length == 0) {
-        final users = await _userRepository.getJobs();
-        insertJob(users);
-        jobs = await getJobs();
-      }
-      // jobDatabaseHelper.clearJobs();
-      emit(LocalDbLoaded(jobs));
     });
   }
 
@@ -59,5 +41,34 @@ class JobCRUDBloc extends Bloc<LocalDbEvent, LocalDbState> {
     jobs = await jobDatabaseHelper.getJobs();
 
     return jobs;
+  }
+
+  void _resetJobs(Emitter<LocalDbState> emit) async {
+    emit(LocalDbLoading());
+    await jobDatabaseHelper.clearJobs();
+    final users = await _userRepository.getJobs();
+    insertJob(users);
+    List<JobModel> jobs = await getJobs();
+    emit(LocalDbLoaded(jobs));
+  }
+
+  void _initLocalDb(Emitter<LocalDbState> emit) async {
+    emit(LocalDbLoading());
+
+    List<JobModel> jobs = await getJobs();
+    print("########## Initializing Local DB ${jobs.length} ##########");
+
+    if (jobs.length == 0) {
+      final users = await _userRepository.getJobs();
+      insertJob(users);
+      jobs = await getJobs();
+    }
+    emit(LocalDbLoaded(jobs));
+  }
+
+  void _searchJobs(String query, Emitter<LocalDbState> emit) async {
+    emit(LocalDbLoading());
+    List<JobModel> searchedJobs = await jobDatabaseHelper.searchJobs(query);
+    emit(LocalDbLoaded(searchedJobs));
   }
 }

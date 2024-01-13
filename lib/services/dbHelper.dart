@@ -19,14 +19,14 @@ class LocalDBHelper {
         return db.execute(
           '''
         CREATE TABLE IF NOT EXISTS jobs (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  title TEXT,
-  location TEXT,
-  createdAt INTEGER,
-  company TEXT,
-  applyUrl TEXT,
-  ImageUrl TEXT
-)
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT,
+          location TEXT,
+          createdAt INTEGER,
+          company TEXT,
+          applyUrl TEXT,
+          imageUrl TEXT
+        )
           ''',
         );
       },
@@ -35,7 +35,7 @@ class LocalDBHelper {
   }
 
   String insert =
-      '''INSERT INTO jobs (title, location, createdAt, company, applyUrl, ImageUrl)
+      '''INSERT INTO jobs (title, location, createdAt, company, applyUrl, imageUrl)
 	VALUES (?, ?, ?, ?, ?, ?)''';
 
   Future<void> insertJob(JobModel job) async {
@@ -71,5 +71,20 @@ class LocalDBHelper {
     }
 
     return jobs;
+  }
+
+  Future<List<JobModel>> searchJobs(String query) async {
+    List<JobModel> searchedJobs = [];
+    final List<Map<String, dynamic>> maps = await _database.query(
+      'jobs',
+      where: 'title LIKE ? OR company LIKE ?',
+      whereArgs: ['%$query%', '%$query%'],
+    );
+
+    for (int i = 0; i < maps.length; i++) {
+      searchedJobs.add(JobModel.fromJson(maps[i]));
+    }
+
+    return searchedJobs;
   }
 }

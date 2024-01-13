@@ -9,7 +9,13 @@ class UserRepository {
     try {
       print("########## Fetching Jobs ##########");
       print(userUrl);
-      Response response = await Dio().get(userUrl);
+
+      // Creating a Dio instance with a custom timeout
+      Dio dio = Dio();
+      dio.options.connectTimeout = Duration(seconds: 10000);  // Set the timeout in milliseconds
+ // Set the timeout in milliseconds
+
+      Response response = await dio.get(userUrl);
       print(response);
       if (response.statusCode == 200) {
         List<dynamic> data = response.data as List<dynamic>;
