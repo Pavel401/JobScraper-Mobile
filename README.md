@@ -1,6 +1,7 @@
 <div align="center">
   <h1>JOBHUNT MOBILE APP 🌐📱💼</h1>
-  <h3>Job Hunt: A streamlined job searching and storing  mobile application.</h3>
+  <h3> <img align="center" src="https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&color=E05D44&random=false&width=600&lines=Job+Hunt:+ A+streamlined+job+searching+and storing+mobile+application."/> </h3>
+
 </div>
   <div align="center">
 
