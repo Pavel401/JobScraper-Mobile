@@ -25,6 +25,7 @@ class _HomePageState extends State<HomePage> {
   int _drawerIndex = 0;
 
   final jobDatabaseHelper = LocalDBHelper();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -178,7 +179,27 @@ class _HomePageState extends State<HomePage> {
             BookmarksScreen(),
           ],
         ),
+        floatingActionButton: _buildScrollToTopButton(),
       ),
+    );
+  }
+  Widget _buildScrollToTopButton() {
+    return Visibility(
+      visible: _scrollController.hasClients &&
+          _scrollController.offset > MediaQuery.of(context).size.height,
+      child: FloatingActionButton(
+        onPressed: _scrollToTop,
+        tooltip: 'Scroll to Top',
+        child: Icon(Icons.arrow_upward),
+      ),
+    );
+  }
+
+  void _scrollToTop() {
+    _scrollController.animateTo(
+      0,
+      duration: Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
     );
   }
 
