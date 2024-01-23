@@ -135,35 +135,92 @@ class _HomePageState extends State<HomePage> {
                 }
                 if (state is LocalDbLoaded) {
                   print("LocalDbLoaded");
-                  List<JobModel> userList = state.jobs;
+                  List<JobModel> userList =state.jobs;
                   return ListView.builder(
                     itemCount: userList.length,
                     itemBuilder: (_, index) {
-                      return Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                      return Container(
+                         height: 110,
+                        padding: EdgeInsets.symmetric(vertical: 9, horizontal: 8),
                         child: GestureDetector(
                           onTap: () {
                             _launchURL(userList[index].applyUrl);
                           },
                           child: Card(
+                            elevation: 5,
+                            shadowColor:  Colors.grey.shade50,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(6),
+                                topRight: Radius.circular(16),
+                                bottomLeft: Radius.circular(16),
+                                bottomRight:  Radius.circular(6)
+                              )
+                            ),
                             child: ListTile(
-                              title: Text(userList[index].title),
-                              subtitle: Text(userList[index].company),
-                              trailing: IconButton(
-                                onPressed: () {
+                              contentPadding: EdgeInsets.symmetric(horizontal: 12,vertical: 6),
+                              title: Text(userList[index].title,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
+                                color:Theme.of(context).brightness == Brightness.dark ? 
+                                  Colors.white
+                                 :Colors.grey.shade800
+                              ),
+                              ),
+                              subtitle: Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.business,
+                                    size: 15,
+                                     color: Theme.of(context).brightness == Brightness.dark ? 
+                                        Colors.white70
+                                       :Colors.grey.shade600
+                                    ),
+                                    SizedBox(width: 6),
+                                    Text(userList[index].company,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                     style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: Theme.of(context).brightness == Brightness.dark ? 
+                                        Colors.white70
+                                       :Colors.grey.shade600
+                                    )),
+                                  ],
+                                ),
+                              ),
+                              trailing: InkResponse(
+                                onTap: () {
                                   bookmarkBloc.add(InsertBookmark(
                                     userList[index],
                                     context,
                                   ));
                                 },
-                                icon: Icon(Icons.bookmark_border_outlined),
+                                child: Icon(Icons.bookmark_border_outlined,
+                                color: Theme.of(context).primaryColor,
+                                ),
                               ),
+                              
                               leading: userList[index].imageUrl.isEmpty
                                   ? Icon(Icons.dangerous)
-                                  : CircleAvatar(
-                                      backgroundImage: NetworkImage(
-                                          userList[index].imageUrl),
+                                  : Container(
+                                     width: 70,
+                                     height: 70,
+                                     decoration: BoxDecoration(
+                                      color: Colors.blue.shade100,
+                                       borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(6),
+                                        topRight: Radius.circular(16),
+                                        bottomLeft: Radius.circular(16),
+                                        bottomRight:  Radius.circular(6)
+                                      ),
+                                      image:userList[index].imageUrl != 'null'  ?  DecorationImage(
+                                        image: NetworkImage(userList[index].imageUrl)
+                                       ) : null
+                                     ),
                                     ),
                             ),
                           ),
@@ -171,9 +228,8 @@ class _HomePageState extends State<HomePage> {
                       );
                     },
                   );
-                }
-
-                return Container();
+               }
+               return Container();
               },
             ),
             BookmarksScreen(),
