@@ -73,7 +73,7 @@ flutter:
   assets:
     - assets/png/
     - assets/svg/
-  #  - .env
+    - .env
   #Uncomment lines below to include .env file
 
   

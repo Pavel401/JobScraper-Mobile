@@ -25,7 +25,7 @@ class LocalDBHelper {
           createdAt INTEGER,
           company TEXT,
           applyUrl TEXT,
-          imageUrl TEXT
+          ImageUrl TEXT
         )
           ''',
         );
@@ -35,7 +35,7 @@ class LocalDBHelper {
   }
 
   String insert =
-      '''INSERT INTO jobs (title, location, createdAt, company, applyUrl, imageUrl)
+      '''INSERT INTO jobs (title, location, createdAt, company, applyUrl, ImageUrl)
 	VALUES (?, ?, ?, ?, ?, ?)''';
 
   Future<void> insertJob(JobModel job) async {

@@ -30,6 +30,7 @@ class JobCRUDBloc extends Bloc<LocalDbEvent, LocalDbState> {
     print("########## Inserting Jobs ##########");
     jobDatabaseHelper.initDatabase().then((value) {
       job.forEach((element) {
+        print("########## Inserting Job: ${element.imageUrl} ##########");
         jobDatabaseHelper.insertJob(element);
       });
     });
@@ -53,10 +54,8 @@ class JobCRUDBloc extends Bloc<LocalDbEvent, LocalDbState> {
   }
 
   Future _initLocalDb(Emitter<LocalDbState> emit) async {
-    
     Future.delayed(Duration(milliseconds: 100));
     emit(LocalDbLoading());
-    
 
     List<JobModel> jobs = await getJobs();
     print("########## Initializing Local DB ${jobs.length} ##########");
@@ -70,15 +69,14 @@ class JobCRUDBloc extends Bloc<LocalDbEvent, LocalDbState> {
   }
 
   Future _searchJobs(String query, Emitter<LocalDbState> emit) async {
-   ///Future.delayed(Duration(milliseconds: 100),() {
-     emit(LocalDbLoading());
-   //});
-   Future.delayed(Duration(milliseconds: 100));
-    
-    await searchResult(query).then((value) {   
-       emit(LocalDbLoaded(value));
+    ///Future.delayed(Duration(milliseconds: 100),() {
+    emit(LocalDbLoading());
+    //});
+    Future.delayed(Duration(milliseconds: 100));
+
+    await searchResult(query).then((value) {
+      emit(LocalDbLoaded(value));
     });
-   
   }
 
   Future<List<JobModel>> searchResult(String query) async {

@@ -183,6 +183,7 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
   Widget _buildScrollToTopButton() {
     return Visibility(
       visible: _scrollController.hasClients &&
