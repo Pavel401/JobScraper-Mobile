@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -6,11 +9,13 @@ import 'package:jobhunt_mobile/blocs/db/local_db_bloc.dart';
 
 import 'package:jobhunt_mobile/model/jobModel.dart';
 import 'package:jobhunt_mobile/repo/jobRepository.dart';
+import 'package:jobhunt_mobile/services/bookmarkHelper.dart';
 
 import 'package:jobhunt_mobile/services/dbHelper.dart';
 import 'package:jobhunt_mobile/views/About/about_us.dart';
 import 'package:jobhunt_mobile/views/Bookmark/bookmarks_screen.dart';
 import 'package:jobhunt_mobile/views/Settings/settings.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
@@ -26,19 +31,182 @@ class _HomePageState extends State<HomePage> {
 
   final jobDatabaseHelper = LocalDBHelper();
   final ScrollController _scrollController = ScrollController();
+  void showTutorial() {
+    tutorialCoachMark.show(context: context);
+  }
+  late TutorialCoachMark tutorialCoachMark;
+
+  GlobalKey keyButton = GlobalKey();
+  GlobalKey keyButton1 = GlobalKey();
+  GlobalKey keyButton2 = GlobalKey();
+  GlobalKey keyButton3 = GlobalKey();
+  GlobalKey keyButton4 = GlobalKey();
+  GlobalKey keyButton5 = GlobalKey();
+
+  GlobalKey keyBottomNavigation1 = GlobalKey();
+  GlobalKey keyBottomNavigation2 = GlobalKey();
+  GlobalKey keyBottomNavigation3 = GlobalKey();
 
   @override
   void initState() {
+    createTutorial();
+    Future.delayed(Duration.zero, showTutorial);
     super.initState();
   }
+
+  void createTutorial() {
+    tutorialCoachMark = TutorialCoachMark(
+      targets: _createTargets(),
+      colorShadow: Colors.black87,
+      textSkip: "SKIP",
+      paddingFocus: 10,
+      opacityShadow: 0.5,
+      imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+      onFinish: () {
+        print("finish");
+      },
+      onClickTarget: (target) {
+        print('onClickTarget: $target');
+      },
+      onClickTargetWithTapPosition: (target, tapDetails) {
+        print("target: $target");
+        print(
+            "clicked at position local: ${tapDetails.localPosition} - global: ${tapDetails.globalPosition}");
+      },
+      onClickOverlay: (target) {
+        print('onClickOverlay: $target');
+      },
+      onSkip: () {
+        print("skip");
+        return true;
+      },
+    );
+  }
+
+  List<TargetFocus> _createTargets() {
+    List<TargetFocus> targets = [];
+    const textStyle = TextStyle(
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: FontWeight.w500
+  );
+    targets.add(
+      TargetFocus(
+        identify: "keyBottomNavigation3",
+        keyTarget: keyBottomNavigation3,
+        alignSkip: Alignment.center,
+        enableOverlayTab: true,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              
+              return  Card(
+                 elevation: 0,
+                shadowColor:  Colors.grey.shade50,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(6),
+                    topRight: Radius.circular(16),
+                    bottomLeft: Radius.circular(16),
+                    bottomRight:  Radius.circular(6)
+                  )
+                ),
+                color: Colors.blueGrey,
+                 child:Padding(
+                   padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
+                   child: Text(
+                      "Showing Job Title",
+                      style: textStyle,
+                    ),
+                 ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+     targets.add(
+      TargetFocus(
+        identify: "keyBottomNavigation2",
+        keyTarget: keyBottomNavigation2,
+        alignSkip: Alignment.center,
+        enableOverlayTab: true,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) {
+              return Card(
+                 elevation: 0,
+                shadowColor:  Colors.grey.shade50,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(6),
+                    topRight: Radius.circular(16),
+                    bottomLeft: Radius.circular(16),
+                    bottomRight:  Radius.circular(6)
+                  )
+                ),
+                color: Colors.blueGrey,
+                 child:Padding(
+                   padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
+                   child: Text(
+                      "Showing Company which is providing the job.",
+                      style: textStyle,
+                    ),
+                  ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+    targets.add(
+      TargetFocus(
+        identify: "keyBottomNavigation1",
+        keyTarget: keyBottomNavigation1,
+        alignSkip: Alignment.topRight,
+        enableOverlayTab: true,
+        contents: [
+          TargetContent(
+            align: ContentAlign.left,
+            builder: (context, controller) {
+              return Card(
+                color: Colors.blueGrey,
+                 elevation: 0,
+                shadowColor:  Colors.grey.shade50,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(6),
+                    topRight: Radius.circular(16),
+                    bottomLeft: Radius.circular(16),
+                    bottomRight:  Radius.circular(6)
+                  )
+                ),
+                 child:Padding(
+                   padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
+                   child:Text(
+                      "Bookmark your Job Card",
+                      style: textStyle,
+                    ),
+                 )
+              );
+            },
+          ),
+        ],
+      ),
+    );
+    return targets;
+}
+
 
   @override
   Widget build(BuildContext context) {
     jobDatabaseHelper.initDatabase();
 
     final localDbBloc = BlocProvider.of<JobCRUDBloc>(context);
-    final bookmarkBloc = BlocProvider.of<BookmarksBloc>(context);
-
+    final bookmarkBloc = BlocProvider.of<BookmarksBloc>(context);  
+   
     return BlocProvider(
       create: (context) => JobCRUDBloc(
         UserRepository(),
@@ -140,31 +308,118 @@ class _HomePageState extends State<HomePage> {
                     itemCount: userList.length,
                     itemBuilder: (_, index) {
                       return Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                        padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                         child: GestureDetector(
                           onTap: () {
                             _launchURL(userList[index].applyUrl);
                           },
-                          child: Card(
-                            child: ListTile(
-                              title: Text(userList[index].title),
-                              subtitle: Text(userList[index].company),
-                              trailing: IconButton(
-                                onPressed: () {
-                                  bookmarkBloc.add(InsertBookmark(
+                          child:  Dismissible(
+                          key: Key(index.toString()),
+                          background: Container(
+                            color: Theme.of(context).primaryColor.withOpacity(0.25),
+                            child: Icon(Icons.bookmark, color: Theme.of(context).primaryColor),
+                            alignment: Alignment.centerLeft,
+                            padding: EdgeInsets.only(left: 20.0),
+                          ),
+                          secondaryBackground: Container(
+                            color: Theme.of(context).primaryColor.withOpacity(0.25),
+                            child: Icon(Icons.bookmark, color: Theme.of(context).primaryColor),
+                            alignment: Alignment.centerRight,
+                            padding: EdgeInsets.only(right: 20.0),
+                          ),
+                          dismissThresholds: {
+                            DismissDirection.endToStart : 0.25,
+                             DismissDirection.startToEnd : 0.25,
+                          },
+                          onDismissed: (direction) {
+                              setState(() {
+                               bookmarkBloc.add(InsertBookmark(
                                     userList[index],
                                     context,
                                   ));
+                              });
+                          },
+                          child:  Card(
+                            elevation: 5,
+                            shadowColor:  Colors.grey.shade50,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(6),
+                                topRight: Radius.circular(16),
+                                bottomLeft: Radius.circular(16),
+                                bottomRight:  Radius.circular(6)
+                              )
+                            ),
+                            child: ListTile(
+                              contentPadding: EdgeInsets.symmetric(horizontal: 12,vertical: 6),
+                              title: Text(userList[index].title,
+                               key: index == 0 ? keyBottomNavigation3 : null,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
+                                color:Theme.of(context).brightness == Brightness.dark ? 
+                                  Colors.white
+                                 :Colors.grey.shade800
+                              ),
+                              ),
+                              subtitle: Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Row(
+                                  key: index == 0 ? keyBottomNavigation2 : null,
+                                  children: [
+                                    Icon(Icons.business,
+                                    size: 15,
+                                     color: Theme.of(context).brightness == Brightness.dark ? 
+                                        Colors.white70
+                                       :Colors.grey.shade600
+                                    ),
+                                    SizedBox(width: 6),
+                                    Text(userList[index].company,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                     style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: Theme.of(context).brightness == Brightness.dark ? 
+                                        Colors.white70
+                                       :Colors.grey.shade600
+                                    )),
+                                  ],
+                                ),
+                              ),
+                              trailing: InkResponse(
+                                key: index == 0 ? keyBottomNavigation1 : null,
+                                onTap: ()async {
+                                setState(() {
+                                    bookmarkBloc.add(InsertBookmark(
+                                    userList[index],
+                                    context,
+                                  ));
+                                  });
                                 },
-                                icon: Icon(Icons.bookmark_border_outlined),
+                                child: Icon(Icons.bookmark_border_outlined,
+                                color: Theme.of(context).primaryColor,
+                                ),
                               ),
                               leading: userList[index].imageUrl.isEmpty
                                   ? Icon(Icons.dangerous)
-                                  : CircleAvatar(
-                                      backgroundImage: NetworkImage(
-                                          userList[index].imageUrl),
-                                    ),
+                                  : Container(
+                                     width: 70,
+                                     height: 70,
+                                     decoration: BoxDecoration(
+                                      color: Colors.blue.shade100,
+                                       borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(6),
+                                        topRight: Radius.circular(16),
+                                        bottomLeft: Radius.circular(16),
+                                        bottomRight:  Radius.circular(6)
+                                      ),
+                                      image:userList[index].imageUrl != 'null'  ?  DecorationImage(
+                                        image: NetworkImage(userList[index].imageUrl)
+                                       ) : null
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -182,6 +437,32 @@ class _HomePageState extends State<HomePage> {
         floatingActionButton: _buildScrollToTopButton(),
       ),
     );
+  }
+
+  Future<List<JobModel>> jobMark(JobCRUDBloc localDbBloc) async {
+    //var data = await getJob(localDbBloc);
+    return  localDbBloc.getJobs();
+  }
+
+
+ Future<bool> _confirmDismissThreshold(DismissDirection direction) async {
+    // Get the current screen size
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    // Calculate the dismiss threshold based on the screen width
+    double dismissThreshold = 0.6; // 30%
+    double thresholdPixels = screenWidth * dismissThreshold;
+
+    // Get the current item position
+    RenderBox itemRenderBox = context.findRenderObject() as RenderBox;
+    double itemPosition = itemRenderBox.localToGlobal(Offset.zero).dx;
+
+    // Calculate the swipe distance
+    double swipeDistance =
+        direction == DismissDirection.endToStart ? itemPosition : screenWidth - itemPosition;
+
+    // Check if the swipe distance is greater than the threshold
+    return swipeDistance > thresholdPixels;
   }
 
   Widget _buildScrollToTopButton() {
