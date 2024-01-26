@@ -415,10 +415,10 @@ class _HomePageState extends State<HomePage> {
                                       image:userList[index].imageUrl != 'null'  ?  DecorationImage(
                                         image: NetworkImage(userList[index].imageUrl)
                                        ) : null
-                                  ),
-                                ),
-                              ),
-                            ),
+                                     ),
+                                    ),
+                             ),
+                           ),
                           ),
                         ),
                       );
@@ -440,28 +440,7 @@ class _HomePageState extends State<HomePage> {
   Future<List<JobModel>> jobMark(JobCRUDBloc localDbBloc) async {
     //var data = await getJob(localDbBloc);
     return  localDbBloc.getJobs();
-  }
-
-
- Future<bool> _confirmDismissThreshold(DismissDirection direction) async {
-    // Get the current screen size
-    double screenWidth = MediaQuery.of(context).size.width;
-
-    // Calculate the dismiss threshold based on the screen width
-    double dismissThreshold = 0.6; // 30%
-    double thresholdPixels = screenWidth * dismissThreshold;
-
-    // Get the current item position
-    RenderBox itemRenderBox = context.findRenderObject() as RenderBox;
-    double itemPosition = itemRenderBox.localToGlobal(Offset.zero).dx;
-
-    // Calculate the swipe distance
-    double swipeDistance =
-        direction == DismissDirection.endToStart ? itemPosition : screenWidth - itemPosition;
-
-    // Check if the swipe distance is greater than the threshold
-    return swipeDistance > thresholdPixels;
-  }
+  } 
 
   Widget _buildScrollToTopButton() {
     return Visibility(
