@@ -1,6 +1,6 @@
 // job_database_helper.dart
 
-import 'package:jobhunt_mobile/model/jobModel.dart';
+import 'package:jobhunt_mobile/model/job_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -13,9 +13,15 @@ class LocalDBHelper {
   LocalDBHelper._internal();
 
   Future<void> initDatabase() async {
+
+    // ----  Open the database at a given path ----
+
     _database = await openDatabase(
       join(await getDatabasesPath(), 'job_database.db'),
       onCreate: (db, version) {
+
+    // --------- Create the required table in the local database if not exist will be created ---------
+
         return db.execute(
           '''
         CREATE TABLE IF NOT EXISTS jobs (
@@ -33,10 +39,14 @@ class LocalDBHelper {
       version: 1,
     );
   }
-
-  String insert =
+ 
+ 
+ 
+ String insert =
       '''INSERT INTO jobs (title, location, createdAt, company, applyUrl, ImageUrl)
 	VALUES (?, ?, ?, ?, ?, ?)''';
+
+  // --------- Adding Job Card Data in the local database ---------
 
   Future<void> insertJob(JobModel job) async {
     try {
@@ -52,19 +62,21 @@ class LocalDBHelper {
         ],
       );
     } catch (e) {
-      print("########## Error inserting job: $e ##########");
+    print("-------- Error inserting job: $e ---------");
     }
   }
 
   Future<void> clearJobs() async {
     await _database.delete('jobs');
-    print("########## Cleared Jobs ##########");
+    print("----------- Cleared Jobs -----------");
   }
+
+// --------- Geting Job Card List from the local database ---------
 
   Future<List<JobModel>> getJobs() async {
     List<JobModel> jobs = [];
     final List<Map<String, dynamic>> maps = await _database.query('jobs');
-    print("########## Getting Jobs ##########");
+    print("------------ Getting Jobs ------------");
 
     for (int i = 0; i < maps.length; i++) {
       jobs.add(JobModel.fromJson(maps[i]));
@@ -74,6 +86,9 @@ class LocalDBHelper {
   }
 
   Future<List<JobModel>> searchJobs(String query) async {
+
+  // ---- Query to fetch results based on company or title ----
+  
     List<JobModel> searchedJobs = [];
     final List<Map<String, dynamic>> maps = await _database.query(
       'jobs',

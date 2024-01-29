@@ -1,8 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:jobhunt_mobile/model/jobModel.dart';
-import 'package:jobhunt_mobile/repo/jobRepository.dart';
-import 'package:jobhunt_mobile/services/dbHelper.dart';
+import 'package:jobhunt_mobile/model/job_model.dart';
+import 'package:jobhunt_mobile/repo/job_repository.dart';
+import 'package:jobhunt_mobile/services/db_helper.dart';
 
 part 'local_db_event.dart';
 part 'local_db_state.dart';
@@ -54,13 +54,14 @@ class JobCRUDBloc extends Bloc<LocalDbEvent, LocalDbState> {
   }
 
   Future _initLocalDb(Emitter<LocalDbState> emit) async {
-
+    
+    // ------------ Awaiting emit to prepare ---------------
     Future.delayed(Duration(milliseconds: 100));
     emit(LocalDbLoading());
     
 
     List<JobModel> jobs = await getJobs();
-    print("########## Initializing Local DB ${jobs.length} ##########");
+    // ------------ Initializing Local DB getting Jobs ---------------
 
     if (jobs.length == 0) {
       final users = await _userRepository.getJobs();
@@ -83,6 +84,7 @@ class JobCRUDBloc extends Bloc<LocalDbEvent, LocalDbState> {
 
 
   Future<List<JobModel>> searchResult(String query) async {
+    // ------------ Search Results from Local Db ---------------
     List<JobModel> searchedJobs = await jobDatabaseHelper.searchJobs(query);
     return searchedJobs;
   }

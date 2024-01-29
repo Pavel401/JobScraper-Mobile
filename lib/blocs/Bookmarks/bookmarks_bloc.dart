@@ -1,8 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:jobhunt_mobile/model/jobModel.dart';
-import 'package:jobhunt_mobile/services/bookmarkHelper.dart';
+import 'package:jobhunt_mobile/model/job_model.dart';
+import 'package:jobhunt_mobile/services/bookmark_helper.dart';
 import 'package:jobhunt_mobile/widgets/toast.dart';
 
 part 'bookmarks_event.dart';
