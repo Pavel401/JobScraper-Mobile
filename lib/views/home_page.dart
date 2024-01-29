@@ -12,6 +12,7 @@ import 'package:jobhunt_mobile/repo/jobRepository.dart';
 import 'package:jobhunt_mobile/services/dbHelper.dart';
 import 'package:jobhunt_mobile/views/About/about_us.dart';
 import 'package:jobhunt_mobile/views/Bookmark/bookmarks_screen.dart';
+import 'package:jobhunt_mobile/views/Search/search.dart';
 import 'package:jobhunt_mobile/views/Settings/settings.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -29,17 +30,12 @@ class _HomePageState extends State<HomePage> {
 
   final jobDatabaseHelper = LocalDBHelper();
   final ScrollController _scrollController = ScrollController();
+
   void showTutorial() {
     tutorialCoachMark.show(context: context);
   }
-  late TutorialCoachMark tutorialCoachMark;
 
-  GlobalKey keyButton = GlobalKey();
-  GlobalKey keyButton1 = GlobalKey();
-  GlobalKey keyButton2 = GlobalKey();
-  GlobalKey keyButton3 = GlobalKey();
-  GlobalKey keyButton4 = GlobalKey();
-  GlobalKey keyButton5 = GlobalKey();
+  late TutorialCoachMark tutorialCoachMark;
 
   GlobalKey keyBottomNavigation1 = GlobalKey();
   GlobalKey keyBottomNavigation2 = GlobalKey();
@@ -60,28 +56,16 @@ class _HomePageState extends State<HomePage> {
       paddingFocus: 10,
       opacityShadow: 0.5,
       imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-      onFinish: () {
-        print("finish");
-      },
-      onClickTarget: (target) {
-        print('onClickTarget: $target');
-      },
-      onClickTargetWithTapPosition: (target, tapDetails) {
-        print("target: $target");
-        print(
-            "clicked at position local: ${tapDetails.localPosition} - global: ${tapDetails.globalPosition}");
-      },
-      onClickOverlay: (target) {
-        print('onClickOverlay: $target');
-      },
       onSkip: () {
-        print("skip");
         return true;
       },
     );
   }
 
   List<TargetFocus> _createTargets() {
+
+  try {
+
     List<TargetFocus> targets = [];
     const textStyle = TextStyle(
     color: Colors.white,
@@ -195,6 +179,11 @@ class _HomePageState extends State<HomePage> {
       ),
     );
     return targets;
+       
+  } catch (e) {
+     
+      return [];
+   }
 }
 
 
@@ -362,28 +351,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                               subtitle: Padding(
                                 padding: const EdgeInsets.only(top: 2),
-                                child: Row(
-                                  key: index == 0 ? keyBottomNavigation2 : null,
-                                  children: [
-                                    Icon(Icons.business,
-                                    size: 15,
-                                     color: Theme.of(context).brightness == Brightness.dark ? 
-                                        Colors.white70
-                                       :Colors.grey.shade600
-                                    ),
-                                    SizedBox(width: 6),
-                                    Text(userList[index].company,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                     style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400,
-                                      color: Theme.of(context).brightness == Brightness.dark ? 
-                                        Colors.white70
-                                       :Colors.grey.shade600
-                                    )),
-                                  ],
-                                ),
+                                child: RowWrapper(key: index == 0 ? keyBottomNavigation2 : null, userList: userList[index]),
                               ),
                               trailing: InkResponse(
                                 key: index == 0 ? keyBottomNavigation1 : null,
@@ -499,41 +467,36 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class JobSearchDelegate extends SearchDelegate<String> {
-  final JobCRUDBloc localDbBloc;
+class RowWrapper extends StatelessWidget {
+  const RowWrapper({
+    super.key,
+    required this.userList,
+  });
 
-  JobSearchDelegate({required this.localDbBloc});
-
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: Icon(Icons.clear),
-        onPressed: () {
-          query = '';
-        },
-      ),
-    ];
-  }
+  final JobModel userList;
 
   @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, '');
-      },
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(Icons.business,
+        size: 15,
+         color: Theme.of(context).brightness == Brightness.dark ? 
+            Colors.white70
+           :Colors.grey.shade600
+        ),
+        SizedBox(width: 6),
+        Text(userList.company,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+         style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: Theme.of(context).brightness == Brightness.dark ? 
+            Colors.white70
+           :Colors.grey.shade600
+        )),
+      ],
     );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    localDbBloc.add(SearchJobs(query));
-    return Container(); // Replace with your search result UI
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    return Container(); // Replace with your suggestion UI
   }
 }

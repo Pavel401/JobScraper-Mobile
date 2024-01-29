@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:jobhunt_mobile/model/jobModel.dart';
 import 'package:jobhunt_mobile/services/bookmarkHelper.dart';
+import 'package:jobhunt_mobile/widgets/toast.dart';
 
 part 'bookmarks_event.dart';
 part 'bookmarks_state.dart';
@@ -52,11 +53,7 @@ class BookmarksBloc extends Bloc<BookmarksEvent, BookmarksState> {
     bookmarkDbHelper.initDatabase().then((value) {
       bookmarkDbHelper.insertJob(job);
     });
-    SnackBar snackBar = SnackBar(
-      content: Text('Job saved.'),
-      duration: Duration(seconds: 1),
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    ToastWidget(message: 'Job Saved.').showToast(context);
   }
 
   void deleteBookmark(JobModel job, BuildContext context) {
@@ -64,11 +61,8 @@ class BookmarksBloc extends Bloc<BookmarksEvent, BookmarksState> {
       bookmarkDbHelper.deleteJob(job);
     });
 
-    SnackBar snackBar = SnackBar(
-      content: Text('Job deleted.'),
-      duration: Duration(seconds: 1),
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    ToastWidget(message: 'Job Deleted.').showToast(context);
+
   }
 
   Future<List<JobModel>> getBookmarks() async {
