@@ -8,9 +8,9 @@ import 'package:jobhunt_mobile/blocs/Bookmarks/bookmarks_bloc.dart';
 import 'package:jobhunt_mobile/blocs/darkTheme/dark_theme_bloc.dart';
 import 'package:jobhunt_mobile/blocs/db/local_db_bloc.dart';
 
-import 'package:jobhunt_mobile/repo/jobRepository.dart';
+import 'package:jobhunt_mobile/repo/job_repository.dart';
 
-import 'package:jobhunt_mobile/views/homepage.dart';
+import 'package:jobhunt_mobile/views/home_page.dart';
 
 import 'package:sizer/sizer.dart';
 
