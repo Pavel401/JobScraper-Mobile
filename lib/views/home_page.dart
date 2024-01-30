@@ -6,13 +6,15 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:jobhunt_mobile/blocs/Bookmarks/bookmarks_bloc.dart';
 import 'package:jobhunt_mobile/blocs/db/local_db_bloc.dart';
 
-import 'package:jobhunt_mobile/model/jobModel.dart';
-import 'package:jobhunt_mobile/repo/jobRepository.dart';
+import 'package:jobhunt_mobile/model/job_model.dart';
+import 'package:jobhunt_mobile/repo/job_repository.dart';
 
-import 'package:jobhunt_mobile/services/dbHelper.dart';
+import 'package:jobhunt_mobile/services/db_helper.dart';
 import 'package:jobhunt_mobile/views/About/about_us.dart';
 import 'package:jobhunt_mobile/views/Bookmark/bookmarks_screen.dart';
+import 'package:jobhunt_mobile/views/Search/search.dart';
 import 'package:jobhunt_mobile/views/Settings/settings.dart';
+import 'package:jobhunt_mobile/widgets/dissmiss_widget.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -29,17 +31,12 @@ class _HomePageState extends State<HomePage> {
 
   final jobDatabaseHelper = LocalDBHelper();
   final ScrollController _scrollController = ScrollController();
+
   void showTutorial() {
     tutorialCoachMark.show(context: context);
   }
-  late TutorialCoachMark tutorialCoachMark;
 
-  GlobalKey keyButton = GlobalKey();
-  GlobalKey keyButton1 = GlobalKey();
-  GlobalKey keyButton2 = GlobalKey();
-  GlobalKey keyButton3 = GlobalKey();
-  GlobalKey keyButton4 = GlobalKey();
-  GlobalKey keyButton5 = GlobalKey();
+  late TutorialCoachMark tutorialCoachMark;
 
   GlobalKey keyBottomNavigation1 = GlobalKey();
   GlobalKey keyBottomNavigation2 = GlobalKey();
@@ -60,28 +57,16 @@ class _HomePageState extends State<HomePage> {
       paddingFocus: 10,
       opacityShadow: 0.5,
       imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-      onFinish: () {
-        print("finish");
-      },
-      onClickTarget: (target) {
-        print('onClickTarget: $target');
-      },
-      onClickTargetWithTapPosition: (target, tapDetails) {
-        print("target: $target");
-        print(
-            "clicked at position local: ${tapDetails.localPosition} - global: ${tapDetails.globalPosition}");
-      },
-      onClickOverlay: (target) {
-        print('onClickOverlay: $target');
-      },
       onSkip: () {
-        print("skip");
         return true;
       },
     );
   }
 
   List<TargetFocus> _createTargets() {
+
+  try {
+
     List<TargetFocus> targets = [];
     const textStyle = TextStyle(
     color: Colors.white,
@@ -195,6 +180,11 @@ class _HomePageState extends State<HomePage> {
       ),
     );
     return targets;
+       
+  } catch (e) {
+     
+      return [];
+   }
 }
 
 
@@ -233,30 +223,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         key: UniqueKey(),
-        drawer: NavigationDrawer(
-          selectedIndex: _drawerIndex,
-          onDestinationSelected: (int value) {
-            setState(() {
-              _drawerIndex = value;
-            });
-            handleDrawerOnClick(value);
-          },
-          children: <Widget>[
-            SizedBox(height: 16),
-            NavigationDrawerDestination(
-              icon: Icon(Icons.settings),
-              label: Text('Settings'),
-            ),
-            NavigationDrawerDestination(
-              icon: FaIcon(FontAwesomeIcons.github),
-              label: Text('Github'),
-            ),
-            NavigationDrawerDestination(
-              icon: Icon(Icons.info_outline),
-              label: Text('About Us'),
-            ),
-          ],
-        ),
+        drawer: drawer(),
         appBar: AppBar(
           title: _selectedIndex == 0 ? Text("Job Hunt") : Text("Bookmarks"),
           actions: [
@@ -294,13 +261,19 @@ class _HomePageState extends State<HomePage> {
               bloc: localDbBloc,
               builder: (context, state) {
                 if (state is LocalDbLoading) {
-                  print("LocalDbLoading");
+                  
+                  // When state is LocalDbLoading it will show loading
+                  // which means there can be instances when data don't load due to Socket Exception or Server Exception
+                
                   return Center(
                     child: CircularProgressIndicator(),
                   );
                 }
+
                 if (state is LocalDbLoaded) {
-                  print("LocalDbLoaded");
+
+                 // When state is LocalDbLoaded list of Job Card will be displayed
+                 
                   List<JobModel> userList = state.jobs;
                   return ListView.builder(
                     itemCount: userList.length,
@@ -311,24 +284,9 @@ class _HomePageState extends State<HomePage> {
                           onTap: () {
                             _launchURL(userList[index].applyUrl);
                           },
-                          child:  Dismissible(
-                          key: Key(index.toString()),
-                          background: Container(
-                            color: Theme.of(context).primaryColor.withOpacity(0.25),
-                            child: Icon(Icons.bookmark, color: Theme.of(context).primaryColor),
-                            alignment: Alignment.centerLeft,
-                            padding: EdgeInsets.only(left: 20.0),
-                          ),
-                          secondaryBackground: Container(
-                            color: Theme.of(context).primaryColor.withOpacity(0.25),
-                            child: Icon(Icons.bookmark, color: Theme.of(context).primaryColor),
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.only(right: 20.0),
-                          ),
-                          dismissThresholds: {
-                            DismissDirection.endToStart : 0.25,
-                             DismissDirection.startToEnd : 0.25,
-                          },
+                          child: JobSlideWidget(
+                          jobKey: Key(index.toString()),
+                          icon: Icons.bookmark,
                           onDismissed: (direction) {
                               setState(() {
                                bookmarkBloc.add(InsertBookmark(
@@ -337,87 +295,54 @@ class _HomePageState extends State<HomePage> {
                                   ));
                               });
                           },
-                          child:  Card(
-                            elevation: 5,
-                            shadowColor:  Colors.grey.shade50,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(6),
-                                topRight: Radius.circular(16),
-                                bottomLeft: Radius.circular(16),
-                                bottomRight:  Radius.circular(6)
-                              )
+                          child:  ListTile(
+                            contentPadding: EdgeInsets.symmetric(horizontal: 12,vertical: 6),
+                            title: Text(userList[index].title,
+                             key: index == 0 ? keyBottomNavigation3 : null,
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                              color:Theme.of(context).brightness == Brightness.dark ? 
+                                Colors.white
+                               :Colors.grey.shade800
                             ),
-                            child: ListTile(
-                              contentPadding: EdgeInsets.symmetric(horizontal: 12,vertical: 6),
-                              title: Text(userList[index].title,
-                               key: index == 0 ? keyBottomNavigation3 : null,
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                                color:Theme.of(context).brightness == Brightness.dark ? 
-                                  Colors.white
-                                 :Colors.grey.shade800
+                            ),
+                            subtitle: Padding(
+                              padding: const EdgeInsets.only(top: 2),
+                              child: RowWrapper(key: index == 0 ? keyBottomNavigation2 : null, userList: userList[index]),
+                            ),
+                            trailing: InkResponse(
+                              key: index == 0 ? keyBottomNavigation1 : null,
+                              onTap: ()async {
+                              setState(() {
+                                  bookmarkBloc.add(InsertBookmark(
+                                  userList[index],
+                                  context,
+                                ));
+                                });
+                              },
+                              child: Icon(Icons.bookmark_border_outlined,
+                              color: Theme.of(context).primaryColor,
                               ),
-                              ),
-                              subtitle: Padding(
-                                padding: const EdgeInsets.only(top: 2),
-                                child: Row(
-                                  key: index == 0 ? keyBottomNavigation2 : null,
-                                  children: [
-                                    Icon(Icons.business,
-                                    size: 15,
-                                     color: Theme.of(context).brightness == Brightness.dark ? 
-                                        Colors.white70
-                                       :Colors.grey.shade600
+                            ),
+                            leading: userList[index].imageUrl.isEmpty
+                                ? Icon(Icons.dangerous)
+                                : Container(
+                                   width: 70,
+                                   height: 70,
+                                   decoration: BoxDecoration(
+                                    color: Colors.blue.shade100,
+                                     borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(6),
+                                      topRight: Radius.circular(16),
+                                      bottomLeft: Radius.circular(16),
+                                      bottomRight:  Radius.circular(6)
                                     ),
-                                    SizedBox(width: 6),
-                                    Text(userList[index].company,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                     style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400,
-                                      color: Theme.of(context).brightness == Brightness.dark ? 
-                                        Colors.white70
-                                       :Colors.grey.shade600
-                                    )),
-                                  ],
-                                ),
-                              ),
-                              trailing: InkResponse(
-                                key: index == 0 ? keyBottomNavigation1 : null,
-                                onTap: ()async {
-                                setState(() {
-                                    bookmarkBloc.add(InsertBookmark(
-                                    userList[index],
-                                    context,
-                                  ));
-                                  });
-                                },
-                                child: Icon(Icons.bookmark_border_outlined,
-                                color: Theme.of(context).primaryColor,
-                                ),
-                              ),
-                              leading: userList[index].imageUrl.isEmpty
-                                  ? Icon(Icons.dangerous)
-                                  : Container(
-                                     width: 70,
-                                     height: 70,
-                                     decoration: BoxDecoration(
-                                      color: Colors.blue.shade100,
-                                       borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(6),
-                                        topRight: Radius.circular(16),
-                                        bottomLeft: Radius.circular(16),
-                                        bottomRight:  Radius.circular(6)
-                                      ),
-                                      image:userList[index].imageUrl != 'null'  ?  DecorationImage(
-                                        image: NetworkImage(userList[index].imageUrl)
-                                       ) : null
-                                     ),
-                                    ),
-                             ),
+                                    image:userList[index].imageUrl != 'null'  ?  DecorationImage(
+                                      image: NetworkImage(userList[index].imageUrl)
+                                     ) : null
+                                   ),
+                                  ),
                            ),
                           ),
                         ),
@@ -435,6 +360,33 @@ class _HomePageState extends State<HomePage> {
         floatingActionButton: _buildScrollToTopButton(),
       ),
     );
+  }
+
+  NavigationDrawer drawer() {
+    return NavigationDrawer(
+        selectedIndex: _drawerIndex,
+        onDestinationSelected: (int value) {
+          setState(() {
+            _drawerIndex = value;
+          });
+          handleDrawerOnClick(value);
+        },
+        children: <Widget>[
+          SizedBox(height: 16),
+          NavigationDrawerDestination(
+            icon: Icon(Icons.settings),
+            label: Text('Settings'),
+          ),
+          NavigationDrawerDestination(
+            icon: FaIcon(FontAwesomeIcons.github),
+            label: Text('Github'),
+          ),
+          NavigationDrawerDestination(
+            icon: Icon(Icons.info_outline),
+            label: Text('About Us'),
+          ),
+        ],
+      );
   }
 
   Future<List<JobModel>> jobMark(JobCRUDBloc localDbBloc) async {
@@ -499,41 +451,40 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class JobSearchDelegate extends SearchDelegate<String> {
-  final JobCRUDBloc localDbBloc;
+class RowWrapper extends StatelessWidget {
+  const RowWrapper({
+    super.key,
+    required this.userList,
+  });
 
-  JobSearchDelegate({required this.localDbBloc});
+  final JobModel userList;
 
   @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: Icon(Icons.clear),
-        onPressed: () {
-          query = '';
-        },
+  Widget build(BuildContext context) {
+    return Padding(
+        padding: const EdgeInsets.only(top: 2),
+        child: Row(
+        children: [
+          Icon(Icons.business,
+          size: 15,
+           color: Theme.of(context).brightness == Brightness.dark ? 
+              Colors.white70
+             :Colors.grey.shade600
+          ),
+          SizedBox(width: 6),
+          Text(userList.company,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+           style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+            color: Theme.of(context).brightness == Brightness.dark ? 
+              Colors.white70
+             :Colors.grey.shade600
+          )),
+        ],
       ),
-    ];
-  }
-
-  @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, '');
-      },
     );
   }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    localDbBloc.add(SearchJobs(query));
-    return Container(); // Replace with your search result UI
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    return Container(); // Replace with your suggestion UI
-  }
 }
+

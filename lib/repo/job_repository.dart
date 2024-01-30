@@ -1,13 +1,16 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:jobhunt_mobile/model/jobModel.dart';
+import 'package:jobhunt_mobile/error_handling/failure.dart';
+import 'package:jobhunt_mobile/model/job_model.dart';
 
 class UserRepository {
   String userUrl = dotenv.env['JOB_API'].toString();
 
   Future<List<JobModel>> getJobs() async {
     try {
-      print("########## Fetching Jobs ##########");
+      print("------------- Fetching Jobs ------------");
       print(userUrl);
 
       // Creating a Dio instance with a custom timeout
@@ -27,8 +30,12 @@ class UserRepository {
       } else {
         throw Exception(response.statusMessage);
       }
-    } catch (e) {
-      throw Exception('Failed to fetch jobs');
+    }on SocketException {
+      throw Failure(message: "No Internet Connection");
+    }on HttpException{
+      throw Failure(message: "Something Went Wrong!!");
+    }on FormatException{
+      throw Failure(message: "Bad Response");
     }
   }
 }
