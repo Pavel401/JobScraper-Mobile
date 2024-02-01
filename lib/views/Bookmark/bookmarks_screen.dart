@@ -9,6 +9,7 @@ import 'package:jobhunt_mobile/widgets/image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class BookmarksScreen extends StatefulWidget {
+  BookmarksScreen({super.key});
   @override
   _BookmarksScreenState createState() => _BookmarksScreenState();
 }
@@ -25,12 +26,15 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
         } else if (state is BookmarksLoaded) {
           return _buildJobList(state.jobs); // List of Jobs Bookmarked 
         } else if (state is BookmarksEmpty) {
-          return Center(
-            child: Text('No saved jobs.'),
+          return NoDataWidget(
+            title:'No saved jobs.',
+            subtitle: 'Save a job card to saved jobs here.',
           );
         } else if (state is BookmarksError) {
-          return Center(
-            child: Text('Error loading saved jobs.'), // Unable to get Bookmarks
+          return NoDataWidget(
+            icon: "assets/svg/error.svg",
+            title:'Error loading saved jobs.',
+            subtitle: 'Can\'t retrieve saved jobs at this moment. Please try again.',
           );
         } else {
           return Container(); // Handle other states if needed
@@ -81,11 +85,13 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
               leading: CachedImageWidget(url: job.imageUrl), // ---- Job Image for Bookmark ---
               subtitle: RowWrapper(userList: job),  // ---- Company Name for Bookmark ---
               trailing: IconButton(
-                onPressed: () {
-                  bookmarkBloc.add(DeleteBookmark(job, context));   // ---- Bookmark Icon ---
-                },
-                icon: Icon(Icons.delete_outline),
-              ),
+                  onPressed: () {
+                    bookmarkBloc.add(DeleteBookmark(job, context));   // ---- Bookmark Icon ---
+                  },
+                  icon: SvgIcon(icon:"assets/svg/bookmark-fill.svg",
+                  color: Theme.of(context).primaryColor,
+                  ),
+                ),
              ),
             ),
           );

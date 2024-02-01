@@ -3,7 +3,6 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:jobhunt_mobile/blocs/Bookmarks/bookmarks_bloc.dart';
 import 'package:jobhunt_mobile/blocs/darkTheme/dark_theme_bloc.dart';
 import 'package:jobhunt_mobile/blocs/db/local_db_bloc.dart';
@@ -13,6 +12,10 @@ import 'package:jobhunt_mobile/repo/job_repository.dart';
 import 'package:jobhunt_mobile/views/home_page.dart';
 
 import 'package:sizer/sizer.dart';
+
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,6 +57,7 @@ class MyApp extends StatelessWidget {
 
           return MaterialApp(
               debugShowCheckedModeBanner: false,
+              navigatorKey: navigatorKey,
               themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
               theme: FlexThemeData.light(
                 scheme: FlexScheme.blue,
@@ -71,7 +75,7 @@ class MyApp extends StatelessWidget {
                 useMaterial3: true,
                 swapLegacyOnMaterial3: true,
                 // To use the Playground font, add GoogleFonts package and uncomment
-                fontFamily: GoogleFonts.notoSans().fontFamily,
+                fontFamily:"WorkSans",
               ),
               darkTheme: FlexThemeData.dark(
                 scheme: FlexScheme.blue,
@@ -88,7 +92,7 @@ class MyApp extends StatelessWidget {
                 useMaterial3: true,
                 swapLegacyOnMaterial3: true,
                 // To use the Playground font, add GoogleFonts package and uncomment
-                fontFamily: GoogleFonts.notoSans().fontFamily,
+                 fontFamily:"WorkSans",
               ),
               home: BlocProvider(
                 create: (context) =>

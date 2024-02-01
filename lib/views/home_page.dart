@@ -10,11 +10,14 @@ import 'package:jobhunt_mobile/model/job_model.dart';
 import 'package:jobhunt_mobile/repo/job_repository.dart';
 
 import 'package:jobhunt_mobile/services/db_helper.dart';
+import 'package:jobhunt_mobile/utility/color_util.dart';
 import 'package:jobhunt_mobile/views/About/about_us.dart';
 import 'package:jobhunt_mobile/views/Bookmark/bookmarks_screen.dart';
 import 'package:jobhunt_mobile/views/Search/search.dart';
 import 'package:jobhunt_mobile/views/Settings/settings.dart';
+import 'package:jobhunt_mobile/widgets/anim_widget.dart';
 import 'package:jobhunt_mobile/widgets/dissmiss_widget.dart';
+import 'package:jobhunt_mobile/widgets/image.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -41,6 +44,8 @@ class _HomePageState extends State<HomePage> {
   GlobalKey keyBottomNavigation1 = GlobalKey();
   GlobalKey keyBottomNavigation2 = GlobalKey();
   GlobalKey keyBottomNavigation3 = GlobalKey();
+  GlobalKey<ScaffoldState> drawerKey  = GlobalKey<ScaffoldState>();
+  PageController pageController = PageController(initialPage: 0);
 
   @override
   void initState() {
@@ -188,6 +193,8 @@ class _HomePageState extends State<HomePage> {
 }
 
 
+
+
   @override
   Widget build(BuildContext context) {
     jobDatabaseHelper.initDatabase();
@@ -195,49 +202,93 @@ class _HomePageState extends State<HomePage> {
     final localDbBloc = BlocProvider.of<JobCRUDBloc>(context);
     final bookmarkBloc = BlocProvider.of<BookmarksBloc>(context);  
    
+   
+   
     return BlocProvider(
       create: (context) => JobCRUDBloc(
         UserRepository(),
       )..add(InitLocalDb()),
       child: Scaffold(
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: _selectedIndex,
-          onDestinationSelected: (int index) {
-            print("Drawer index: $index");
-
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-          destinations: [
-            NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.bookmark_border_outlined),
-              selectedIcon: Icon(Icons.bookmark),
-              label: 'Bookmarks',
-            ),
-          ],
+        bottomNavigationBar: ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30)
+          ),
+          child: NavigationBar(
+            selectedIndex: _selectedIndex,
+            onDestinationSelected: (int index) {
+              setState(() {
+                _selectedIndex = index;
+                 pageController.animateToPage(_selectedIndex,
+                  duration: Duration(milliseconds: 300), curve: Curves.easeIn);
+              });
+              
+            },
+            destinations: [
+              NavigationDestination(
+                icon: Icon(Icons.home_outlined),
+                selectedIcon: AnimationFadeScale(
+                  key: ValueKey(6),
+                  child: Icon(Icons.home)),
+                 label: 'Home',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.bookmark_border_outlined),
+                selectedIcon: AnimationFadeScale(
+                  key: ValueKey(_selectedIndex),
+                  child: Icon(Icons.bookmark)),
+                label: 'Bookmarks',
+              ),
+            ],
+          ),
         ),
-        key: UniqueKey(),
-        drawer: drawer(),
+        // key: UniqueKey(),
+        key: drawerKey,
+        drawer: SizedBox(
+          width: MediaQuery.of(context).size.width/1.7,
+          child: drawer()),
         appBar: AppBar(
+          toolbarHeight: 62,
+          leading: InkResponse(
+            onTap: () {
+              drawerKey.currentState!.openDrawer();
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SvgIcon(
+                icon: "assets/svg/menu.svg",
+                width: 24,
+                height: 24,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          backgroundColor: Theme.of(context).primaryColor,
           title: _selectedIndex == 0 ? Text("Job Hunt") : Text("Bookmarks"),
+          titleTextStyle: Theme.of(context).textTheme.titleLarge!.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold
+          ),
           actions: [
             _selectedIndex == 0
                 ? IconButton(
                     onPressed: () {
                       localDbBloc.add(ResetJobs());
                     },
-                    icon: Icon(Icons.replay_outlined),
+                    icon: SvgIcon(icon: "assets/svg/refresh.svg",
+                    width: 24,
+                    height: 24,
+                    color: Colors.white,
+                    ),
                   )
                 : SizedBox.shrink(),
             _selectedIndex == 0
                 ? IconButton(
-                    icon: Icon(Icons.search),
+                    icon: SvgIcon(icon: "assets/svg/search.svg",
+                    width: 26,
+                    height: 26,
+                    color: Colors.white,
+                    ),
                     onPressed: () async {
                       final String? result = await showSearch<String>(
                         context: context,
@@ -251,17 +302,18 @@ class _HomePageState extends State<HomePage> {
                     },
                   )
                 : SizedBox.shrink(),
+                SizedBox(width: 8)
           ],
         ),
         body: PageView(
           physics: NeverScrollableScrollPhysics(),
-          controller: PageController(initialPage: _selectedIndex),
+          controller: pageController,
           children: [
             BlocBuilder<JobCRUDBloc, LocalDbState>(
               bloc: localDbBloc,
               builder: (context, state) {
                 if (state is LocalDbLoading) {
-                  
+                  print('object');
                   // When state is LocalDbLoading it will show loading
                   // which means there can be instances when data don't load due to Socket Exception or Server Exception
                 
@@ -270,8 +322,8 @@ class _HomePageState extends State<HomePage> {
                   );
                 }
 
-                if (state is LocalDbLoaded) {
-
+                if (state is LocalDbLoaded && state.jobs.isNotEmpty) {
+                 
                  // When state is LocalDbLoaded list of Job Card will be displayed
                  
                   List<JobModel> userList = state.jobs;
@@ -285,6 +337,7 @@ class _HomePageState extends State<HomePage> {
                             _launchURL(userList[index].applyUrl);
                           },
                           child: JobSlideWidget(
+                          index: index,
                           jobKey: Key(index.toString()),
                           icon: Icons.bookmark,
                           onDismissed: (direction) {
@@ -311,38 +364,25 @@ class _HomePageState extends State<HomePage> {
                               padding: const EdgeInsets.only(top: 2),
                               child: RowWrapper(key: index == 0 ? keyBottomNavigation2 : null, userList: userList[index]),
                             ),
-                            trailing: InkResponse(
-                              key: index == 0 ? keyBottomNavigation1 : null,
-                              onTap: ()async {
-                              setState(() {
-                                  bookmarkBloc.add(InsertBookmark(
-                                  userList[index],
-                                  context,
-                                ));
-                                });
-                              },
-                              child: Icon(Icons.bookmark_border_outlined,
-                              color: Theme.of(context).primaryColor,
+                            trailing: Padding(
+                              padding: const EdgeInsets.only(right :8.0),
+                              child: InkResponse(
+                                key: index == 0 ? keyBottomNavigation1 : null,
+                                onTap: ()async {
+                                setState(() {
+                                    bookmarkBloc.add(InsertBookmark(
+                                    userList[index],
+                                    context,
+                                  ));
+                                  });
+                                },
+                                child: SvgIcon(
+                                icon:"assets/svg/bookmark.svg",
+                                color: Theme.of(context).primaryColor,
+                                ),
                               ),
                             ),
-                            leading: userList[index].imageUrl.isEmpty
-                                ? Icon(Icons.dangerous)
-                                : Container(
-                                   width: 70,
-                                   height: 70,
-                                   decoration: BoxDecoration(
-                                    color: Colors.blue.shade100,
-                                     borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(6),
-                                      topRight: Radius.circular(16),
-                                      bottomLeft: Radius.circular(16),
-                                      bottomRight:  Radius.circular(6)
-                                    ),
-                                    image:userList[index].imageUrl != 'null'  ?  DecorationImage(
-                                      image: NetworkImage(userList[index].imageUrl)
-                                     ) : null
-                                   ),
-                                  ),
+                            leading:CachedImageWidget(url: userList[index].imageUrl), 
                            ),
                           ),
                         ),
@@ -351,7 +391,7 @@ class _HomePageState extends State<HomePage> {
                   );
                 }
 
-                return Container();
+                return NoDataWidget();
               },
             ),
             BookmarksScreen(),
@@ -374,16 +414,26 @@ class _HomePageState extends State<HomePage> {
         children: <Widget>[
           SizedBox(height: 16),
           NavigationDrawerDestination(
-            icon: Icon(Icons.settings),
-            label: Text('Settings'),
-          ),
-          NavigationDrawerDestination(
-            icon: FaIcon(FontAwesomeIcons.github),
-            label: Text('Github'),
-          ),
-          NavigationDrawerDestination(
-            icon: Icon(Icons.info_outline),
-            label: Text('About Us'),
+              icon: AnimationFadeSlide(
+                duration: 400,
+                dx: 0.3,
+                child: Icon(Icons.settings)
+              ),
+              label: Text('Settings'),
+            ),
+            NavigationDrawerDestination(
+              icon:AnimationFadeSlide(
+                duration: 600,
+                dx: 0.5,
+                child: FaIcon(FontAwesomeIcons.github),
+                 ),
+              label: Text('Github')),
+           NavigationDrawerDestination(
+              icon: AnimationFadeSlide(
+                duration: 750,
+                dx: 0.7,
+                child:Icon(Icons.info_outline)),
+              label: Text('About Us'),
           ),
         ],
       );
@@ -448,6 +498,42 @@ class _HomePageState extends State<HomePage> {
         ),
       );
     }
+  }
+}
+
+class NoDataWidget extends StatelessWidget {
+  const NoDataWidget({
+    super.key,
+    this.title,
+    this.icon,
+    this.subtitle
+  });
+
+  final String? subtitle,icon,title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SvgIcon(icon: icon ?? 'assets/svg/empty.svg',
+          width: 100,
+          height: 100,
+          color: ColorUtil.isDarkMode(context) ?
+           Theme.of(context).primaryColor: Colors.black,
+        ),
+         SizedBox(height: 24),
+        Text( title ?? 'No Job related data found',
+        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+          fontWeight: FontWeight.w700,
+          color: Theme.of(context).primaryColor
+        ),
+        ),
+        SizedBox(height: 16),
+        Text( subtitle ?? 'Please try again after sometime.'),
+        SizedBox(height: 16),
+      ],
+    );
   }
 }
 
