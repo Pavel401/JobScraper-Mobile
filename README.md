@@ -37,7 +37,7 @@
 Also, make sure you are running the JobScraper locally.
 
 ```env:-
-JOB_API: http://10.0.2.2:8080/getallJobsFromSQL
+JOB_API=http://10.0.2.2:8080/getallJobsFromSQL
 ```
 
 ### ⚙️Getting Started
