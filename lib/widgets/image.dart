@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jobhunt_mobile/utility/color_util.dart';
 
 class CachedImageWidget extends StatelessWidget {
@@ -30,19 +31,38 @@ class CachedImageWidget extends StatelessWidget {
         child: CachedNetworkImage(
         imageUrl : url,
         errorWidget: (context, url, error) {
-           return Icon(Icons.error); 
+           return Center(
+            child :Image.asset('assets/png/appicon.png',
+            ));
           },
           progressIndicatorBuilder: (context, url, progress) {
-             return ColorFiltered(
-            colorFilter: ColorFilter.mode(
-            Theme.of(context).brightness == Brightness.dark  ?
-             Colors.grey.shade700 :Colors.grey, // Grayscale color
-              BlendMode.saturation,
-            ),
-            child : Image.asset('assets/png/icon.png'));
+            return Center(
+            child :Image.asset('assets/png/appicon.png',
+            ));
           },
          fadeOutDuration: Duration(milliseconds: 600),
         ),
       );
+  }
+}
+
+
+class SvgIcon extends StatelessWidget {
+  const SvgIcon({super.key,required this.icon,this.color,this.width,this.height});
+  final String icon;
+  final double? width,height;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return SvgPicture.asset(
+      icon,
+      width: width,
+      height: height,
+      colorFilter: ColorFilter.mode(
+       color ?? (ColorUtil.isDarkMode(context) ?
+         Colors.white: Colors.black)
+      , BlendMode.srcIn),
+    );
   }
 }

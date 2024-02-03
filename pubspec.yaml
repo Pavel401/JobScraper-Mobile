@@ -77,4 +77,16 @@ flutter:
     - .env
   #Uncomment lines below to include .env file
 
-  
+  fonts:
+    - family: WorkSans
+      fonts:
+        - asset: assets/fonts/Work_Sans/WorkSans-Bold.ttf
+          weight: 800
+        - asset: assets/fonts/Work_Sans/WorkSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Work_Sans/WorkSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Work_Sans/WorkSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Work_Sans/WorkSans-Light.ttf
+          weight: 300
